@@ -1,0 +1,2 @@
+ALTER TABLE delivery
+ADD COLUMN shippingid VARCHAR(64);
