@@ -8,7 +8,7 @@ NodeCommerce, as the name implies, is a modern online store backend built with N
 
 - **Nodejs**
 - **TypeScript**
-- **Express.js**
+- **Expressjs**
 - **PostgreSQL**
 - **TypeORM**
 - **Axios HTTP**
@@ -23,7 +23,7 @@ NodeCommerce, as the name implies, is a modern online store backend built with N
 - Order processing
 - Payment Service with flutterwave API
 - Delivery Service with Shipbubble API
-- Object reational Mapping with TypeORM
+- Object relational Mapping with TypeORM
 - Database integration with PostgreSQL
 - Scalable and modular project structure (Clean Architecture)
 
@@ -78,7 +78,7 @@ NodeCommerce, as the name implies, is a modern online store backend built with N
 
 ```bash
 # Clone the repository
-git clone https://github.com/Elvinkess/nodecommerce.git
+git clone https://github.com/Elvinkess/E_Commerce.git
 
 # Navigate to the project directory
 cd E_COMMERCEAPP
