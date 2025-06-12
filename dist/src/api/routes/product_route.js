@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const program_1 = require("../program");
+const product_controller_1 = require("../controllers/product_controller");
+const multer_1 = require("../middleware/multer");
+const user_1 = require("../../core/domain/entity/user");
+const productsRoute = (0, express_1.Router)();
+let productController = new product_controller_1.ProductController(program_1.productLogic);
+productsRoute.post("/", productController.create);
+productsRoute.post("/product-with-image", multer_1.upload.fields([{ name: "image", maxCount: 1 }, { name: "icon", maxCount: 1 }]), program_1.authmiddleware.authenticateJWT, program_1.authmiddleware.authorizeRole([user_1.UserRole.ADMIN]), productController.createProductWithImage);
+productsRoute.post("/search", productController.search);
+productsRoute.get("/", productController.getAllproduct);
+exports.default = productsRoute;

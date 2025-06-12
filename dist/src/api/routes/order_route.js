@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const order_controller_1 = require("../controllers/order_controller");
+const program_1 = require("../program");
+const orderRoute = (0, express_1.Router)();
+let orderController = new order_controller_1.OrderController(program_1.orderLogic);
+orderRoute.get("/order/:userId", orderController.create);
+orderRoute.get("/payment/:orderId", orderController.payment);
+orderRoute.get("/confirmpayment", orderController.confirmPayment);
+exports.default = orderRoute;
