@@ -7,5 +7,3 @@ CREATE TABLE "public"."product" (
     "image_url" text
     
 )
-ALTER TABLE product 
-ADD COLUMN  image_url TEXT;

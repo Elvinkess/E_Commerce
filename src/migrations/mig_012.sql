@@ -1,7 +1,7 @@
 CREATE TABLE order_payment(
 id SERIAL PRIMARY KEY,
  amount  INT NOT NULL,
- status payment_status NOT NULL DEFAULT 'pending',
+ status VARCHAR(320) NOT NULL DEFAULT 'pending',
  orderId INT NOT NULL,
  userEmail VARCHAR(320) NOT NULL,
  date TIMESTAMPTZ DEFAULT NOW(),

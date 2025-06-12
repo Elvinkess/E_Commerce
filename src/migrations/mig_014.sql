@@ -5,6 +5,6 @@ CREATE TABLE delivery (
     addressId TEXT,
     trackingUrl TEXT,
     status delivery_status NOT NULL DEFAULT 'pending',
-    date TIMESTAMPTZ DEFAULT NOW(),
+    date TIMESTAMPTZ DEFAULT NOW()
 );
 

@@ -3,6 +3,6 @@ CREATE TABLE myusers (
     email VARCHAR(320) UNIQUE NOT NULL,
     username VARCHAR(255) NOT NULL,
     password VARCHAR(255),
-    role userRole NOT NULL DEFAULT 'user'
+    role VARCHAR(320) NOT NULL DEFAULT 'user'
 );
 
