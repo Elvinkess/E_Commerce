@@ -38,7 +38,7 @@ class UserLogic {
             return hmac.update(password).digest('hex').toString();
         };
         this.encryptDataUsingJWT = (data, durationInSeconds) => __awaiter(this, void 0, void 0, function* () {
-            let secret = process.env.JWT_SCRET;
+            let secret = process.env.JWT_SECRET;
             let encrypted = jsonwebtoken_1.default.sign(data, secret, { expiresIn: durationInSeconds });
             console.log(jsonwebtoken_1.default.verify(encrypted, secret));
             return encrypted;

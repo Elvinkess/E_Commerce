@@ -38,7 +38,7 @@ export class UserLogic implements IUserLogic{
 
 encryptDataUsingJWT = async (data:JwtPayload, durationInSeconds: number): Promise<string> => {
 
-        let secret = process.env.JWT_SCRET!
+        let secret = process.env.JWT_SECRET!
         let encrypted = jwt.sign(
             data
           , secret, { expiresIn: durationInSeconds});
