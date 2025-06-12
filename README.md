@@ -72,6 +72,12 @@ NodeCommerce, as the name implies, is a modern online store backend built with N
   - Manage all user orders
   - Monitor delivery statuses
 
+## Live Demo
+
+Check out the live version of this project on [Render](https://e-commerce-as1q.onrender.com/product).
+This endpoint returns all products from the store.
+
+
 
 
 ## 🛠️ Installation
