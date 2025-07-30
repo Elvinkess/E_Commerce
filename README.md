@@ -76,6 +76,9 @@ NodeCommerce, as the name implies, is a modern online store backend built with N
 
 Check out the live version of this project on [Render](https://e-commerce-as1q.onrender.com/product).
 This endpoint returns all products from the store.
+⚠️ Note: If you encounter a database connection error, it's likely because the PostgreSQL instance was purged due to inactivity. This project uses Render's free tier, which may automatically delete databases that are unused for an extended period. You may need to create a new database on Render or connect your own.
+
+
 
 
 
