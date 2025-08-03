@@ -17,18 +17,18 @@ dotenv.config();
 
 const AppDataSource = new DataSource({
     type: "postgres",
-    url: process.env.DATABASE_URL,
-    //host: "localhost",
-    //port: 5432,
-    //username: "postgres",
+    //url: process.env.DATABASE_URL, //for connection string
+    host: "localhost",
+    port: parseInt(process.env.PGPORT || "5432", 10),
+    username: "postgres",
     password:process.env.PASSWORD,
-    database: "E_commerce",
+    database: process.env.DATABASE,
     entities: [UserConfig,CategoriesConfig, ProductConfig, InventoryConfig,CartConfig,CartItemConfig,OrderConfig,OrderItemConfig,OrderPaymentConfig,AddressConfig,DeliveryConfig],
     synchronize: false,
     logging: false,
-    ssl: {
-        rejectUnauthorized: false, // Required for hosted DBs like Render or Supabase
-      }
+    // ssl: {
+    //     rejectUnauthorized: false, // Required for hosted DBs like Render or Supabase
+    //   }
 })
 
 AppDataSource.initialize()
