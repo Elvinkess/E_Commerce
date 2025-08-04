@@ -20,20 +20,6 @@ exports.productInCartRes = productInCartRes;
 class CartItemResponse extends cart_item_1.CartItem {
     constructor(init) {
         super(init.cart_id, init.product_id, init.purchased_price, init.quantity);
-        // setCatItemStatus = ()=>{
-        //     if(!this.product){
-        //         return CartItemStatus.Unavailable
-        //     }else if(this.product.price < this.purchased_price){
-        //         return  CartItemStatus.OverPriced
-        //     }else if(this.product.price > this.purchased_price){
-        //         return CartItemStatus.UnderPriced
-        //     }else if(this.product.inventory?.quantity_available ?? 0 < this.quantity){
-        //         return CartItemStatus.LessQuantity
-        //     }
-        //     else{
-        //         return CartItemStatus.Okay
-        //     }
-        // }
         this.setCatItemStatus = () => {
             var _a, _b, _c;
             if (!this.product) {

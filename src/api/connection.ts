@@ -1,8 +1,6 @@
 import { DataSource } from "typeorm"
 import { UserConfig } from "../core/infrastructure/repository/config/user_config"
 import { CategoriesConfig } from "../core/infrastructure/repository/config/categories_config"
-import { InventoryDB } from "../core/infrastructure/repository/data_access/inventory_db"
-import { ProductDB } from "../core/infrastructure/repository/data_access/product_db"
 import { ProductConfig } from "../core/infrastructure/repository/config/product_config"
 import { InventoryConfig } from "../core/infrastructure/repository/config/inventory_config"
 import { CartConfig } from "../core/infrastructure/repository/config/cart_config"
@@ -17,7 +15,7 @@ dotenv.config();
 
 const AppDataSource = new DataSource({
     type: "postgres",
-    //url: process.env.DATABASE_URL, //for connection string
+    //url: process.env.DATABASE_URL, //connection string for hosted DBs
     host: "localhost",
     port: parseInt(process.env.PGPORT || "5432", 10),
     username: "postgres",
@@ -32,9 +30,10 @@ const AppDataSource = new DataSource({
 })
 
 AppDataSource.initialize()
-    .then(() => {
+    .then(async() => {
         // here you can start to work with your database
-        console.log("connected boss")
+        console.log("connected to DB boss")
+
     })
     .catch((error) => console.log(error))
 

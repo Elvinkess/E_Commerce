@@ -8,4 +8,5 @@ let orderController = new order_controller_1.OrderController(program_1.orderLogi
 orderRoute.get("/order/:userId", orderController.create);
 orderRoute.get("/payment/:orderId", orderController.payment);
 orderRoute.get("/confirmpayment", orderController.confirmPayment);
+orderRoute.delete("/remove/:orderId/user/:userId", orderController.removeOrder);
 exports.default = orderRoute;

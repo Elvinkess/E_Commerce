@@ -15,7 +15,6 @@ class AddressController {
         this.address = address;
         this.createAddress = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             try {
-                console.log(req.body);
                 let address = yield this.address.saveAddress(req.body);
                 res.json(address);
             }

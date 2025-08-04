@@ -1,87 +1,118 @@
-# NodeCommerce
+# 🛒 NodeCommerce
 
-NodeCommerce, as the name implies, is a modern online store backend built with Node.js, TypeScript, TypeORM, PostgreSQL, and Express. It provides a solid foundation for handling products, categories, inventory, users, carts, orders, and deliveries.
+NodeCommerce is a modern backend for an online store, built using **Node.js**, **TypeScript**, **Express**, **TypeORM**, and **PostgreSQL**. It provides essential e-commerce features like user authentication, product listings, cart management, order processing, payment handling, and delivery tracking.
 
-
+---
 
 ## 🚀 Tech Stack
 
-- **Nodejs**
+- **Node.js**
 - **TypeScript**
-- **Expressjs**
+- **Express.js**
 - **PostgreSQL**
 - **TypeORM**
-- **Axios HTTP**
+- **Redis** – Used to store and manage cart items efficiently
+- **Axios** – For making HTTP requests (e.g., to third-party APIs)
+- **Flutterwave API** – For payments
+- **Shipbubble API** – For deliveries
+
+---
 
 ## ✨ Features
 
-- User authentication and Authorization (JWT-based)
-- User roles (Admin and User:customer)
-- Product listing and management
-- Inventory management
-- Shopping cart functionality
-- Order processing
-- Payment Service with flutterwave API
-- Delivery Service with Shipbubble API
-- Object relational Mapping with TypeORM
-- Database integration with PostgreSQL
-- Scalable and modular project structure (Clean Architecture)
+- 🔐 User authentication & JWT-based authorization
+- 👤 User roles (Admin & Customer)
+- 📦 Product & Category management
+- 📊 Inventory control
+- 🛒 Cart system powered by Redis
+- 🧾 Order creation, deletion, and status updates
+- 💳 Payment via Flutterwave
+- 🚚 Shipping integration via Shipbubble
+- 🧱 Modular & scalable Clean Architecture
 
-    ## 🔄 Application Flow
+---
+
+## 🔄 Application Flow
 
 ### 1. 👤 User Registration & Login
-- Users can register using their email and password.
-- Authentication is handled via JWT tokens.
-- Logged-in users can access cart and order functionalities.
-- Each user has a unique ID
+- Register and log in with email/password
+- Authenticated via JWT
+- Access cart and order endpoints after login
 
-
-### 2. 🛍️ Product categories
-- All users can view categories.
-- Only Admin  can create a  category.  Since shipping is handled by an API service(please create product under these  category to make life easy for the delivery company: "Hot food","Dry food and supplements","Electronics and gadgets","Groceries","Sensitive items (ATM cards, documents)","Light weight items","Machinery","Medical supplies","Health and beauty","Furniture and fittings","Fashion wears")
-- Each category has a unique ID that is needed to create a product,hence you cannot create a product without an existing category.
+### 2. 🗂️ Category Management
+- **All users** can view categories
+- **Admins only** can create new categories
+- Suggested categories for delivery include:
+  - `"Hot food"`, `"Dry food and supplements"`, `"Electronics and gadgets"`, `"Groceries"`, `"Sensitive items"`, `"Light weight items"`, `"Machinery"`, `"Medical supplies"`, `"Health and beauty"`, `"Furniture and fittings"`, `"Fashion wears"`
 
 ### 3. 🛍️ Product Browsing
-- All users can view products.
-- Only Admin can  create a  product, every product must have a  category,hence a category ID is mandatoryto create a product.
-- Supports product search and filtering.
-- Each product displays details like name, description, price, and image.
+- All users can view and search products
+- Admins can create products (must belong to a category)
+- Product attributes: name, description, price, image, etc.
 
-### 4. 🛒 Cart Management
-- Authenticated users can add, update, or remove items from their cart.
-- Cart data is persisted in the database for each user.
+### 4. 🛒 Cart Management (via Redis)
+- Authenticated users:
+  - Add items to cart
+  - Update item quantities
+  - Remove items
+- Cart is stored in Redis per user session
 
-### 5. 💳 Checkout
-- Users can review cart contents and proceed to checkout.
-- Shipping information is collected before order placement.
-- Optional integration with payment gateways.
+### 5. 💳 Checkout & Payment
+- Users can review cart and place orders
+- Shipping info is collected before placing orders
+- Payment is processed using **Flutterwave**
+- Webhook support for confirming transactions (`/confirmpayment?tx_ref=...`)
 
-### 6. 📦 Order Placement
-- Orders are created and stored in the database.
-- Includes product items, user info, and shipping address.
-- Order status starts as "Pending".
+### 6. 📦 Order Management
+- Orders are created from the cart
+- Includes shipping address, items, and user info
+- Order lifecycle: `Pending → Paid → shipped → Delivered`
+- Users can delete only pending orders i.e orders not paid for
+- Admins can view and manage all orders
 
-### 7. 🚚 Shipping & Delivery
-- Orders are dispatched via  Shipbubble API.
-- Shipping info and tracking ID are updated in the order.
-- Order status is updated in real-time as delivery progresses via web hookes.
-
-### 8. 🛠️ Admin Panel *(Optional)*
-- Admins can:
-  - Add, update, and delete products
-  - Manage all user orders
-  - Monitor delivery statuses
-
-## Live Demo
-
-Check out the live version of this project on [Render](https://e-commerce-as1q.onrender.com/product).
-This endpoint returns all products from the store.
-⚠️ Note: If you encounter a database connection error, it's likely because the PostgreSQL instance was purged due to inactivity. This project uses Render's free tier, which may automatically delete databases that are unused for an extended period. You may need to create a new database on Render or connect your own.
+### 7. 🚚 Delivery (Shipbubble API)
+- Delivery is automatically generated once an order is paid for
+- Orders are dispatched via Shipbubble
+- API auto-generates tracking ID and delivery updates
+- Webhooks update order status in real-time
 
 
 
+---
 
+## 📦 REST API Highlights
 
+| Method | Endpoint                              | Description                      |
+|--------|---------------------------------------|----------------------------------|
+| GET    | `/product`                            | View all products                |
+| POST   | `/cart/addItem`                       | Add item to cart                 |
+| GET    | `/cart/removeItem`                    | Remove item from cart            |
+| GET    | `/order/:userId`                      | View a user's order              |
+| GET    | `order/order/:userId"`                | Create order from cart           |
+| DELETE | `/order/remove/:orderId/user/:userId` | Delete an order                  |
+| GET    | `order/payment/:orderId`              | Initialize payment               |
+| GET    | `order/confirmpayment?tx_ref=...`     | Handle Flutterwave webhook       |
+| DELETE |  `/cart/remove/:cartId`               | Delete a cart                    |
+| POST   |  `/user`                              | User sign in                     |
+| POST   | `/user/signin`                        | User sign In                     |
+| POST   |  `/product/product-with-image`        | Creates a product with a picture |
+| POST   |  `/product/search`                    | Search for a product             |
+| POST   |   `/address/`                         | Create address                   |
+| GET    |    `/categories`                      | Get all categories               |
+| POST   |   `/categories/`                      | Create categories                |
+| GET    |    `/cart/getcart/:userId`            | Get pending cart                 |
+---
+
+## 🔗 Live Demo
+
+Visit:  
+👉 [https://e-commerce-as1q.onrender.com/product](https://e-commerce-as1q.onrender.com/product)
+
+⚠️ **Note**: The Render PostgreSQL instance may go inactive if unused. You may need to:
+- Recreate a new DB instance on Render
+- Or connect your own PostgreSQL DB
+
+---
 
 ## 🛠️ Installation
 
@@ -89,17 +120,17 @@ This endpoint returns all products from the store.
 # Clone the repository
 git clone https://github.com/Elvinkess/E_Commerce.git
 
-# Navigate to the project directory
+# Navigate to the project
 cd E_COMMERCEAPP
 
 # Install dependencies
 npm install
 
-# Setup environment variables (see `.env.example`)
+# Copy env variables and configure
 cp .env.example .env
 
-# Run migrations (if applicable)
+# Run migrations
 npm run typeorm migration:run
 
-# Start the server
+# Start the development server
 npm run dev

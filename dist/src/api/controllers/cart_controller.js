@@ -13,15 +13,6 @@ exports.CartController = void 0;
 class CartController {
     constructor(cart, user) {
         this.cart = cart;
-        this.createCart = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            try {
-                let cart = yield this.cart.create(req.body);
-                res.json(cart);
-            }
-            catch (err) {
-                res.json({ error: err.message });
-            }
-        });
         this.getCart = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             try {
                 let cart = yield this.cart.get(req.params.userId);
@@ -29,6 +20,26 @@ class CartController {
             }
             catch (err) {
                 res.json({ error: err.message });
+            }
+        });
+        this.addCartItem = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                let requestData = req.body;
+                let updateCart = yield this.cart.addItemToCart(requestData);
+                res.status(200).json({ message: "Item added to cart successfully", data: updateCart });
+            }
+            catch (err) {
+                res.status(500).json({ error: err.message || "Failed to add item to cart" });
+            }
+        });
+        this.removeCartItem = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                let requestData = req.body;
+                let updateCart = yield this.cart.removeItemFromCart(requestData);
+                res.status(200).json({ message: "Item removed from cart successfully", data: updateCart });
+            }
+            catch (err) {
+                res.status(500).json({ error: err.message || "Failed to remove item from cart" });
             }
         });
         this.remove = (req, res, next) => __awaiter(this, void 0, void 0, function* () {

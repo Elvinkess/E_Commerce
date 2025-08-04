@@ -8,7 +8,6 @@ import { Address } from "../../core/domain/entity/address"
         constructor(private address:IAddressLogic){}
         createAddress =  async(req : Request<{}, {}, AddressRequest>, res: Response, next: NextFunction)=>{
         try {
-            console.log(req.body)
 
             let address = await this.address.saveAddress(req.body);
             res.json(address);

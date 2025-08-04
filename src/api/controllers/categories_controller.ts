@@ -10,21 +10,18 @@ export class CategoriesController{
     }
      createCategories = async (req : Request<{}, {}, Categories>, res: Response, next: NextFunction)=>{
         try {
-            console.log({body: req.body})
             let categories = await this.categories.create(req.body)
             res.json(categories);
-        } catch (ex) {
-            console.log(ex)
-            res.json({error: (ex as Error).message})
+        } catch (err) {
+            res.json({error: (err as Error).message})
         }
     }
     removeCategories = async (req:Request<{},{},Categories>,res:Response,next:NextFunction)=>{
         try {
             let removeCat = await this.categories.remove(req.body)
             res.json(removeCat)
-        } catch (ex) {
-            console.log(ex)
-            res.json({error: (ex as Error).message})
+        } catch (err) {
+            res.json({error: (err as Error).message})
         }
     }
 
@@ -33,9 +30,8 @@ export class CategoriesController{
             let AllCategories = await this.categories.getAll()
             res.json(AllCategories);
             
-        } catch (ex) {
-            console.log(ex)
-            res.json({error: (ex as Error).message})
+        } catch (err) {
+            res.json({error: (err as Error).message})
         }
     }
 
@@ -43,9 +39,8 @@ export class CategoriesController{
         try {
             let AllCatprodcts = await  this.categories.getCategoryproducts(req.body.id)
             res.json(AllCatprodcts)
-        } catch (ex) {
-            console.log(ex)
-            res.json({error: (ex as Error).message})
+        } catch (err) {
+            res.json({error: (err as Error).message})
         }
     }
 

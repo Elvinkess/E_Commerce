@@ -2,13 +2,13 @@ import { CreateOrderPaymentresponse } from "../../domain/dto/responses/order_pay
 import { OrderItemResponse, OrderResponse } from "../../domain/dto/responses/order_response";
 import { CartItemStatus } from "../../domain/dto/responses/product_cart_response";
 import { delivery_status } from "../../domain/entity/delivery";
-import { inventory } from "../../domain/entity/inventory";
 import { Order } from "../../domain/entity/order";
 import { OrderItem } from "../../domain/entity/order_item";
 import { OrderPayment } from "../../domain/entity/order_payment";
 import { cart_status } from "../../domain/enums/cart_status_enum";
 import { OrderStatus } from "../../domain/enums/order_items";
 import { paymentStatus } from "../../domain/enums/payment_status_enums";
+import { ICartCache } from "../interface/data_access/cart_cache_db";
 import { ICartDB } from "../interface/data_access/cart_db";
 import { IDeliveryDB } from "../interface/data_access/delivery_db";
 import { IInventoryDB } from "../interface/data_access/inventory_db";
@@ -24,7 +24,7 @@ import { IPaymentLogic } from "../interface/logic/payment_logic";
 import { RandomUtility } from "../utilities/random_utility";
 
 export class OrderLogic implements IOrderLogic{
-    constructor(private orderDB:IOrderDB,public orderItemDB:IOrderItemDB,public  cartDB:ICartDB,private productDB:IProductDB,private userDB:IUserDb,public cartLogic:ICartLogic,public inventoryDB:IInventoryDB,public deliveryLogic:IDeliveryLogic,public paymentLogic:IPaymentLogic,public orderPaymentDB:IOrderPaymentDB,public deliveryDB:IDeliveryDB){
+    constructor(private orderDB:IOrderDB,public orderItemDB:IOrderItemDB,public  cartDB:ICartDB,private productDB:IProductDB,private userDB:IUserDb,public cartLogic:ICartLogic,public inventoryDB:IInventoryDB,public deliveryLogic:IDeliveryLogic,public paymentLogic:IPaymentLogic,public orderPaymentDB:IOrderPaymentDB,public deliveryDB:IDeliveryDB,public cartCache:ICartCache){
         
     }
     get = async (userId: number): Promise<OrderResponse> => {
@@ -33,14 +33,11 @@ export class OrderLogic implements IOrderLogic{
         let orderedItems :  OrderItem[] = []
         
         let cart = await this.cartLogic.get(userId);
-        
 
 
         // return existing order if any is available esle  create a new one
         let existingOrder = await  this.orderDB.getOne({user_id:userId,status:OrderStatus.PENDING})
-        // if(existingOrder){
-        //   return existingOrder as OrderResponse
-        // }
+       
         let savedOrder = existingOrder ??  await this.orderDB.save(new Order(userId,totalAmount,OrderStatus.PENDING)) 
 
         let OrderItems = await  this.orderItemDB.get({order_id:savedOrder.id})
@@ -86,6 +83,31 @@ export class OrderLogic implements IOrderLogic{
         orderResponse.total_price = totalAmount
         return orderResponse
     }
+
+    remove = async (orderId: number, userId: number): Promise<string> => {
+
+      let user = await this.userDB.get({ id: userId });
+      if (!user.length) throw new Error("User does not exist");
+    
+      let order = await this.orderDB.getOne({ id: orderId, user_id: userId });
+      if (!order) throw new Error("Order does not exist or does not belong to user");
+    
+      if (order.status !== OrderStatus.PENDING) {
+        throw new Error("Only pending orders can be removed");
+      }
+    
+      await this.orderItemDB.removeMany({ order_id: orderId });
+    
+      await this.orderPaymentDB.removeMany({ orderId: orderId });
+    
+      await this.deliveryDB.removeMany({ orderid: orderId });
+    
+      await this.orderDB.remove({ id: orderId });
+    
+      return "Order successfully removed";
+    };
+    
+ 
     
 
     payForOrder = async(orderId:number):Promise<CreateOrderPaymentresponse> =>{
@@ -148,27 +170,34 @@ export class OrderLogic implements IOrderLogic{
             orderDetails: await this.get(user.id)
           }
         let shipment =await this.deliveryLogic.createDelivery(deliveryreq)
-        console.log("SHIPMENT HAS BEGAN")
 
 
         // INVENTORY UPDATE DATA
         
         let orderedItems  = await this.orderItemDB.get({order_id:order?.id})
 
-        for(let i=0; i < orderedItems.length ; i++){
-          
-            let product =  await this.productDB.getOne({id:orderedItems[i].product_id})
-            let inventory =  await this.inventoryDB.getOne({id:product?.inventory_id})
-            let qAvailable = (inventory?.quantity_available ?? 0) - orderedItems[i].quantity
-            let qSold = (inventory?.quantity_sold ?? 0) +  orderedItems[i].quantity
-            
-            //UPDATE CART,ORDER AND INVENTORY
-            let updatedInventory =  await this.inventoryDB.update({id:product?.inventory_id},{quantity_available:qAvailable,quantity_sold:qSold})  
-            await this.cartDB.update({user_id:order?.user_id,user_status:cart_status.ACTIVE},{user_status:cart_status.INACTIVE});  
-            await this.orderDB.update({id:order?.id},{status:OrderStatus.PAID});
-            await this.deliveryDB.update({orderid:order?.id},{status:delivery_status.PAID})
-            console.log(updatedInventory)  
+      
+        for (let i = 0; i < orderedItems.length; i++) {
+          let product = await this.productDB.getOne({ id: orderedItems[i].product_id });
+          let inventory = await this.inventoryDB.getOne({ id: product?.inventory_id });
+        
+          let qAvailable = (inventory?.quantity_available ?? 0) - orderedItems[i].quantity;
+          let qSold = (inventory?.quantity_sold ?? 0) + orderedItems[i].quantity;
+        
+          await this.inventoryDB.update(
+            { id: product?.inventory_id },
+            { quantity_available: qAvailable, quantity_sold: qSold }
+         );
         }
+        
+        await this.cartCache.clearCart(order.user_id);
+        await this.cartDB.update(
+          { user_id: order?.user_id, user_status: cart_status.ACTIVE },
+          { user_status: cart_status.INACTIVE }
+        );
+        await this.orderDB.update({ id: order?.id }, { status: OrderStatus.PAID });
+        await this.deliveryDB.update({ orderid: order?.id }, { status: delivery_status.PAID });
+        
 
 
       return updatedOrderPayment
@@ -186,23 +215,6 @@ export class OrderLogic implements IOrderLogic{
 
 
 
-     // payForOrder = async(userId:number){
-        //     //find active user order based on userID,just call get 
-        //     //get the total price from the order
-        //     //call payment gateway to create a payment session for the userId to pay
-        // }
 
-        // completeOrder = async(){
-        //     //gets a feedback from payment gateway
-        //     //if payment is successful mark the orderstatus as completed
-        // }
-
-
-                         //update inventory do this when the payment is successful
-                 //let qAvailable = (product.inventory?.quantity_available ?? 0)  - cartItem.quantity
-                // let qSold = (product.inventory?.quantity_sold ?? 0) + cartItem.quantity
-                 //let updatedInventory = await this.inventoryDB.update({id:product.inventory_id},{quantity_available:qAvailable,quantity_sold:qSold});
-                 //cartItem.product!.inventory = updatedInventory
-                // console.log(updatedInventory)
 
                 

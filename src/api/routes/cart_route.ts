@@ -4,7 +4,8 @@ import { CartController } from "../controllers/cart_controller";
 
 const cartRoute = Router();
 let cartController = new CartController(cartLogic,userLogic)
-cartRoute.post("/", cartController.createCart);
 cartRoute.get("/getcart/:userId", cartController.getCart);
-cartRoute.get("/remove/:cartId", cartController.remove);
+cartRoute.delete("/remove/:cartId", cartController.remove);
+cartRoute.post("/addItem", cartController.addCartItem);
+cartRoute.post("/removeItem", cartController.removeCartItem);
 export default cartRoute

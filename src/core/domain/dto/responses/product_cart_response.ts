@@ -26,20 +26,7 @@ export class CartItemResponse extends  CartItem{
         this.id =init.id
     }
     product?:ProductResponse
-    // setCatItemStatus = ()=>{
-    //     if(!this.product){
-    //         return CartItemStatus.Unavailable
-    //     }else if(this.product.price < this.purchased_price){
-    //         return  CartItemStatus.OverPriced
-    //     }else if(this.product.price > this.purchased_price){
-    //         return CartItemStatus.UnderPriced
-    //     }else if(this.product.inventory?.quantity_available ?? 0 < this.quantity){
-    //         return CartItemStatus.LessQuantity
-    //     }
-    //     else{
-    //         return CartItemStatus.Okay
-    //     }
-    // }
+
     setCatItemStatus = (): CartItemStatus => {
         if (!this.product) {
             return CartItemStatus.Unavailable;
@@ -62,9 +49,9 @@ export class CartItemResponse extends  CartItem{
     };
     
 
-updateCartItemStatus  = ()=>{
-    this.status = this.setCatItemStatus()
-}
+    updateCartItemStatus  = ()=>{
+         this.status = this.setCatItemStatus()
+    }
     status?: CartItemStatus 
 
 }

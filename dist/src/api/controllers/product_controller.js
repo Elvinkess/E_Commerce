@@ -24,8 +24,8 @@ class ProductController extends base_controller_1.default {
                 let productResponse = yield this.productLogic.create(req.body);
                 res.json(productResponse);
             }
-            catch (ex) {
-                res.json({ error: ex.message });
+            catch (err) {
+                res.json({ error: err.message });
             }
         });
         this.createProductWithImage = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
@@ -34,12 +34,11 @@ class ProductController extends base_controller_1.default {
                 let reqBody = req.body.data;
                 let createProoductBody = JSON.parse(reqBody);
                 createProoductBody.image = prodImg;
-                console.log({ createProoductBody });
                 let productResponse = yield this.productLogic.createWithImage(createProoductBody);
                 res.json(productResponse);
             }
-            catch (ex) {
-                res.json({ error: ex.message });
+            catch (err) {
+                res.json({ error: err.message });
             }
         });
         this.search = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
@@ -47,8 +46,8 @@ class ProductController extends base_controller_1.default {
                 let product = yield this.productLogic.search(req.body);
                 res.json(product);
             }
-            catch (ex) {
-                res.json({ error: ex.message });
+            catch (err) {
+                res.json({ error: err.message });
             }
         });
         this.getAllproduct = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
@@ -56,9 +55,8 @@ class ProductController extends base_controller_1.default {
                 let Allproducts = yield this.productLogic.getAll();
                 res.json(Allproducts);
             }
-            catch (ex) {
-                console.log(ex);
-                res.json({ error: ex.message });
+            catch (err) {
+                res.json({ error: err.message });
             }
         });
     }

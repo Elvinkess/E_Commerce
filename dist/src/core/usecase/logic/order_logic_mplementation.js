@@ -20,7 +20,7 @@ const order_items_1 = require("../../domain/enums/order_items");
 const payment_status_enums_1 = require("../../domain/enums/payment_status_enums");
 const random_utility_1 = require("../utilities/random_utility");
 class OrderLogic {
-    constructor(orderDB, orderItemDB, cartDB, productDB, userDB, cartLogic, inventoryDB, deliveryLogic, paymentLogic, orderPaymentDB, deliveryDB) {
+    constructor(orderDB, orderItemDB, cartDB, productDB, userDB, cartLogic, inventoryDB, deliveryLogic, paymentLogic, orderPaymentDB, deliveryDB, cartCache) {
         this.orderDB = orderDB;
         this.orderItemDB = orderItemDB;
         this.cartDB = cartDB;
@@ -32,6 +32,7 @@ class OrderLogic {
         this.paymentLogic = paymentLogic;
         this.orderPaymentDB = orderPaymentDB;
         this.deliveryDB = deliveryDB;
+        this.cartCache = cartCache;
         this.get = (userId) => __awaiter(this, void 0, void 0, function* () {
             var _a, _b, _c, _d;
             let totalAmount = 0;
@@ -39,9 +40,6 @@ class OrderLogic {
             let cart = yield this.cartLogic.get(userId);
             // return existing order if any is available esle  create a new one
             let existingOrder = yield this.orderDB.getOne({ user_id: userId, status: order_items_1.OrderStatus.PENDING });
-            // if(existingOrder){
-            //   return existingOrder as OrderResponse
-            // }
             let savedOrder = existingOrder !== null && existingOrder !== void 0 ? existingOrder : yield this.orderDB.save(new order_1.Order(userId, totalAmount, order_items_1.OrderStatus.PENDING));
             let OrderItems = yield this.orderItemDB.get({ order_id: savedOrder.id });
             if (OrderItems.length !== 0) {
@@ -76,6 +74,22 @@ class OrderLogic {
             orderResponse.Order_items = orderedItems;
             orderResponse.total_price = totalAmount;
             return orderResponse;
+        });
+        this.remove = (orderId, userId) => __awaiter(this, void 0, void 0, function* () {
+            let user = yield this.userDB.get({ id: userId });
+            if (!user.length)
+                throw new Error("User does not exist");
+            let order = yield this.orderDB.getOne({ id: orderId, user_id: userId });
+            if (!order)
+                throw new Error("Order does not exist or does not belong to user");
+            if (order.status !== order_items_1.OrderStatus.PENDING) {
+                throw new Error("Only pending orders can be removed");
+            }
+            yield this.orderItemDB.removeMany({ order_id: orderId });
+            yield this.orderPaymentDB.removeMany({ orderId: orderId });
+            yield this.deliveryDB.removeMany({ orderid: orderId });
+            yield this.orderDB.remove({ id: orderId });
+            return "Order successfully removed";
         });
         this.payForOrder = (orderId) => __awaiter(this, void 0, void 0, function* () {
             var _a;
@@ -148,30 +162,14 @@ class OrderLogic {
                 let inventory = yield this.inventoryDB.getOne({ id: product === null || product === void 0 ? void 0 : product.inventory_id });
                 let qAvailable = ((_a = inventory === null || inventory === void 0 ? void 0 : inventory.quantity_available) !== null && _a !== void 0 ? _a : 0) - orderedItems[i].quantity;
                 let qSold = ((_b = inventory === null || inventory === void 0 ? void 0 : inventory.quantity_sold) !== null && _b !== void 0 ? _b : 0) + orderedItems[i].quantity;
-                //UPDATE CART,ORDER AND INVENTORY
-                let updatedInventory = yield this.inventoryDB.update({ id: product === null || product === void 0 ? void 0 : product.inventory_id }, { quantity_available: qAvailable, quantity_sold: qSold });
-                yield this.cartDB.update({ user_id: order === null || order === void 0 ? void 0 : order.user_id, user_status: cart_status_enum_1.cart_status.ACTIVE }, { user_status: cart_status_enum_1.cart_status.INACTIVE });
-                yield this.orderDB.update({ id: order === null || order === void 0 ? void 0 : order.id }, { status: order_items_1.OrderStatus.PAID });
-                yield this.deliveryDB.update({ orderid: order === null || order === void 0 ? void 0 : order.id }, { status: delivery_1.delivery_status.PAID });
-                console.log(updatedInventory);
+                yield this.inventoryDB.update({ id: product === null || product === void 0 ? void 0 : product.inventory_id }, { quantity_available: qAvailable, quantity_sold: qSold });
             }
+            yield this.cartCache.clearCart(order.user_id);
+            yield this.cartDB.update({ user_id: order === null || order === void 0 ? void 0 : order.user_id, user_status: cart_status_enum_1.cart_status.ACTIVE }, { user_status: cart_status_enum_1.cart_status.INACTIVE });
+            yield this.orderDB.update({ id: order === null || order === void 0 ? void 0 : order.id }, { status: order_items_1.OrderStatus.PAID });
+            yield this.deliveryDB.update({ orderid: order === null || order === void 0 ? void 0 : order.id }, { status: delivery_1.delivery_status.PAID });
             return updatedOrderPayment;
         });
     }
 }
 exports.OrderLogic = OrderLogic;
-// payForOrder = async(userId:number){
-//     //find active user order based on userID,just call get 
-//     //get the total price from the order
-//     //call payment gateway to create a payment session for the userId to pay
-// }
-// completeOrder = async(){
-//     //gets a feedback from payment gateway
-//     //if payment is successful mark the orderstatus as completed
-// }
-//update inventory do this when the payment is successful
-//let qAvailable = (product.inventory?.quantity_available ?? 0)  - cartItem.quantity
-// let qSold = (product.inventory?.quantity_sold ?? 0) + cartItem.quantity
-//let updatedInventory = await this.inventoryDB.update({id:product.inventory_id},{quantity_available:qAvailable,quantity_sold:qSold});
-//cartItem.product!.inventory = updatedInventory
-// console.log(updatedInventory)

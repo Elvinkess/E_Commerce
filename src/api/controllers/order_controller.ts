@@ -21,7 +21,18 @@ export class OrderController{
         try {
             let payment = await this.order.payForOrder(req.params.orderId);
             console.log(payment)
-            res.json(payment)
+            res.status(200).json(payment)
+            
+        } catch (err) {
+            res.json({error: (err as Error).message})
+            
+        }
+    }
+
+    removeOrder = async(req : Request<{orderId:number,userId:number}, {},{} >, res: Response, next: NextFunction)=>{
+        try {
+            let removeOrder = await this.order.remove(req.params.orderId,req.params.userId);
+            res.status(200).json(removeOrder)
             
         } catch (err) {
             res.json({error: (err as Error).message})
@@ -34,7 +45,7 @@ export class OrderController{
             try {
                 let confirmPayment = await this.order.processCompletedPaymentForOrder(req.query.tx_ref);
                 console.log(confirmPayment)
-                res.json(confirmPayment)
+                res.status(200).json(confirmPayment)
                 
             } catch (err) {
                 res.json({error: (err as Error).message})

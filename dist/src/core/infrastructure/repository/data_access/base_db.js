@@ -28,6 +28,13 @@ class BaseDb {
             yield this.model.delete(query);
             return removeEnt[0];
         });
+        this.removeMany = (query) => __awaiter(this, void 0, void 0, function* () {
+            const entitiesToRemove = yield this.model.findBy(query);
+            if (entitiesToRemove.length === 0)
+                return [];
+            yield this.model.delete(query);
+            return entitiesToRemove;
+        });
         this.update = (query, keyToUpdate) => __awaiter(this, void 0, void 0, function* () {
             yield this.model.update(query, keyToUpdate);
             return yield this.model.findOneBy(query);

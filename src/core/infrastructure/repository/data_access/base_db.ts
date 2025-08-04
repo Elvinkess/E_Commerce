@@ -30,6 +30,13 @@ export class BaseDb<TEntity extends BaseEntity> implements IBaseDb<TEntity>{
         await this.model.delete(query);
         return removeEnt[0]
     }
+    removeMany = async (query: Partial<{ [key in keyof TEntity]: any; }>): Promise<TEntity[]> => {
+        const entitiesToRemove = await this.model.findBy(query);
+        if (entitiesToRemove.length === 0) return [];
+        await this.model.delete(query);
+        return entitiesToRemove;
+    }
+    
     update = async (query:Partial<{[key in keyof TEntity]:any}>,keyToUpdate:Partial<{[key in keyof TEntity]:any}>) : Promise<TEntity | null>=>{
        
           await this.model.update(query,keyToUpdate)

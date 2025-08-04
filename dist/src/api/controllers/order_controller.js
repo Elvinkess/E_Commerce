@@ -27,7 +27,16 @@ class OrderController {
             try {
                 let payment = yield this.order.payForOrder(req.params.orderId);
                 console.log(payment);
-                res.json(payment);
+                res.status(200).json(payment);
+            }
+            catch (err) {
+                res.json({ error: err.message });
+            }
+        });
+        this.removeOrder = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                let removeOrder = yield this.order.remove(req.params.orderId, req.params.userId);
+                res.status(200).json(removeOrder);
             }
             catch (err) {
                 res.json({ error: err.message });
@@ -37,7 +46,7 @@ class OrderController {
             try {
                 let confirmPayment = yield this.order.processCompletedPaymentForOrder(req.query.tx_ref);
                 console.log(confirmPayment);
-                res.json(confirmPayment);
+                res.status(200).json(confirmPayment);
             }
             catch (err) {
                 res.json({ error: err.message });

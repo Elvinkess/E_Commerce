@@ -1,6 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import { User } from "../../core/domain/entity/user";
-import { IUserLogic } from "../../core/usecase/interface/logic/user_logic";
 import { IProductLogic } from "../../core/usecase/interface/logic/product_logic";
 import { CreateProduct } from "../../core/domain/dto/requests/product_request";
 import { ProductResponse } from "../../core/domain/dto/responses/product_response";
@@ -22,8 +20,8 @@ export class ProductController extends BaseController {
 
             let productResponse: ProductResponse = await this.productLogic.create(req.body);
             res.json(productResponse)
-        } catch(ex){
-            res.json({error: (ex as Error).message})
+        } catch(err){
+            res.json({error: (err as Error).message})
         }
     }
     createProductWithImage = async (req : Request<{}, {}>, res: Response, next: NextFunction) => {
@@ -33,19 +31,18 @@ export class ProductController extends BaseController {
             let reqBody = req.body.data;
             let createProoductBody = JSON.parse(reqBody) as CreateProduct
             createProoductBody.image = prodImg
-            console.log({createProoductBody})
             let productResponse: ProductResponse = await this.productLogic.createWithImage(createProoductBody);
             res.json(productResponse)
-        } catch(ex){
-            res.json({error: (ex as Error).message})
+        } catch(err){
+            res.json({error: (err as Error).message})
         }
     }
     search= async (req: Request<{},{},searchProductsQuery>,res:Response, next:NextFunction)=>{
         try {
             let product:Product[] = await this.productLogic.search(req.body)
             res.json(product)
-        } catch (ex) {
-            res.json({error: (ex as Error).message})
+        } catch (err) {
+            res.json({error: (err as Error).message})
         }
     }
 
@@ -54,9 +51,8 @@ export class ProductController extends BaseController {
             let Allproducts = await this.productLogic.getAll()
             res.json(Allproducts);
             
-        } catch (ex) {
-            console.log(ex)
-            res.json({error: (ex as Error).message})
+        } catch (err) {
+            res.json({error: (err as Error).message})
         }
     }
 }

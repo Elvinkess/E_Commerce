@@ -16,13 +16,11 @@ class CategoriesController {
         this.product = product;
         this.createCategories = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             try {
-                console.log({ body: req.body });
                 let categories = yield this.categories.create(req.body);
                 res.json(categories);
             }
-            catch (ex) {
-                console.log(ex);
-                res.json({ error: ex.message });
+            catch (err) {
+                res.json({ error: err.message });
             }
         });
         this.removeCategories = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
@@ -30,9 +28,8 @@ class CategoriesController {
                 let removeCat = yield this.categories.remove(req.body);
                 res.json(removeCat);
             }
-            catch (ex) {
-                console.log(ex);
-                res.json({ error: ex.message });
+            catch (err) {
+                res.json({ error: err.message });
             }
         });
         this.getAllCategories = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
@@ -40,9 +37,8 @@ class CategoriesController {
                 let AllCategories = yield this.categories.getAll();
                 res.json(AllCategories);
             }
-            catch (ex) {
-                console.log(ex);
-                res.json({ error: ex.message });
+            catch (err) {
+                res.json({ error: err.message });
             }
         });
         this.getCatproducts = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
@@ -50,9 +46,8 @@ class CategoriesController {
                 let AllCatprodcts = yield this.categories.getCategoryproducts(req.body.id);
                 res.json(AllCatprodcts);
             }
-            catch (ex) {
-                console.log(ex);
-                res.json({ error: ex.message });
+            catch (err) {
+                res.json({ error: err.message });
             }
         });
     }
