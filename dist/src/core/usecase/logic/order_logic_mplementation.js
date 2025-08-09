@@ -154,7 +154,6 @@ class OrderLogic {
                 orderDetails: yield this.get(user.id)
             };
             let shipment = yield this.deliveryLogic.createDelivery(deliveryreq);
-            console.log("SHIPMENT HAS BEGAN");
             // INVENTORY UPDATE DATA
             let orderedItems = yield this.orderItemDB.get({ order_id: order === null || order === void 0 ? void 0 : order.id });
             for (let i = 0; i < orderedItems.length; i++) {

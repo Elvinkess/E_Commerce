@@ -27,7 +27,6 @@ class CartLogic {
             //hit the redis server to get cart before the DB
             const cachedCart = yield this.cartCache.getCartResponse(userId);
             if (cachedCart) {
-                console.log("getting cart from redis");
                 return cachedCart;
             }
             let activeCart = yield this.cartDB.getOne({ user_id: userId, user_status: cart_status_enum_1.cart_status.ACTIVE });
@@ -97,8 +96,7 @@ class CartLogic {
                 if (quantity < cartItem.quantity) {
                     // reduce quantity
                     let newQuantity = cartItem.quantity - quantity;
-                    let updateCartItem = yield this.cartItemDB.update({ id: cartItem.id }, { quantity: newQuantity });
-                    console.log(updateCartItem, "updated cart item from removed Q");
+                    yield this.cartItemDB.update({ id: cartItem.id }, { quantity: newQuantity });
                 }
                 else if (quantity === cartItem.quantity) {
                     // remove item completely

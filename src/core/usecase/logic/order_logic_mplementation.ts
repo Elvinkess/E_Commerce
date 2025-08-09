@@ -24,7 +24,7 @@ import { IPaymentLogic } from "../interface/logic/payment_logic";
 import { RandomUtility } from "../utilities/random_utility";
 
 export class OrderLogic implements IOrderLogic{
-    constructor(private orderDB:IOrderDB,public orderItemDB:IOrderItemDB,public  cartDB:ICartDB,private productDB:IProductDB,private userDB:IUserDb,public cartLogic:ICartLogic,public inventoryDB:IInventoryDB,public deliveryLogic:IDeliveryLogic,public paymentLogic:IPaymentLogic,public orderPaymentDB:IOrderPaymentDB,public deliveryDB:IDeliveryDB,public cartCache:ICartCache){
+    constructor(private orderDB:IOrderDB,private orderItemDB:IOrderItemDB,private  cartDB:ICartDB,private productDB:IProductDB,private userDB:IUserDb,private cartLogic:ICartLogic,private inventoryDB:IInventoryDB,private deliveryLogic:IDeliveryLogic,private paymentLogic:IPaymentLogic,private orderPaymentDB:IOrderPaymentDB,private deliveryDB:IDeliveryDB,private cartCache:ICartCache){
         
     }
     get = async (userId: number): Promise<OrderResponse> => {

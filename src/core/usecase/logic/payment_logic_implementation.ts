@@ -21,7 +21,7 @@ import { confirmPaymentResponse, FlwConfirmPaymentRes } from "../../domain/dto/r
 
 
 export class Paymentlogic implements IPaymentLogic{
-    constructor(private orderDB:IOrderDB,private userDB:IUserDb,private orderPaymentDB:IOrderPaymentDB,private paymentService:IPaymentService,public deliveryDB:IDeliveryDB,public cardDB:ICartDB,public inventoryDB:IInventoryDB,public orderItemDB:IOrderItemDB,public  productDB:IProductDB,public deliveryLogic:IDeliveryLogic){
+    constructor(private orderDB:IOrderDB,private userDB:IUserDb,private orderPaymentDB:IOrderPaymentDB,private paymentService:IPaymentService,private deliveryDB:IDeliveryDB,private cardDB:ICartDB,private inventoryDB:IInventoryDB,private orderItemDB:IOrderItemDB,private  productDB:IProductDB,private deliveryLogic:IDeliveryLogic){
 
     }
     initiatePayforOrder  = async (payment: OrderPayment): Promise<CreateOrderPaymentresponse> => {

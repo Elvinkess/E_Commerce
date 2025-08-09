@@ -27,7 +27,7 @@ export interface PackageItem {
 }
 
 export class DeliveryLogic implements IDeliveryLogic{
-    constructor(private deliveryService:IDeliveryService,private userDB:IUserDb,private addressDB:IAddressDB,public deliveryDb:IDeliveryDB,public productDB:IProductDB){}
+    constructor(private deliveryService:IDeliveryService,private userDB:IUserDb,private addressDB:IAddressDB,private deliveryDb:IDeliveryDB,private productDB:IProductDB){}
     
     
     createDelivery = async(createDeliveryRequest:CreateDeliveryRequest):Promise<CreateShippingResponse>=>{
