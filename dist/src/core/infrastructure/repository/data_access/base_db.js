@@ -39,6 +39,13 @@ class BaseDb {
             yield this.model.update(query, keyToUpdate);
             return yield this.model.findOneBy(query);
         });
+        this.findPaginated = (page, limit) => __awaiter(this, void 0, void 0, function* () {
+            const [entities, total] = yield this.model.findAndCount({
+                skip: (page - 1) * limit,
+                take: limit,
+            });
+            return [entities, total];
+        });
         this._comparisonSearch = (...args_1) => __awaiter(this, [...args_1], void 0, function* (query = {}, contains = {}, numberComparison = {}, _in = {}) {
             let searchQuery = {};
             for (let [key, value] of Object.entries(query)) {
@@ -67,7 +74,7 @@ class BaseDb {
             return yield this.model.findBy(searchQuery);
         });
         this.comparisonSearch = (options) => __awaiter(this, void 0, void 0, function* () {
-            var _a, _b, _c, _d;
+            var _a, _b, _c, _d, _e;
             let searchQuery = {};
             for (let [key, value] of Object.entries((_a = options.query) !== null && _a !== void 0 ? _a : {})) {
                 searchQuery[key] = value;
@@ -91,6 +98,9 @@ class BaseDb {
             }
             for (let [key, value] of Object.entries((_d = options._in) !== null && _d !== void 0 ? _d : {})) {
                 searchQuery[key] = (0, typeorm_1.In)(value);
+            }
+            for (let [key, value] of Object.entries((_e = options._not) !== null && _e !== void 0 ? _e : {})) {
+                searchQuery[key] = (0, typeorm_1.Not)(value);
             }
             return yield this.model.findBy(searchQuery);
         });

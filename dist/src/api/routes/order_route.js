@@ -6,6 +6,7 @@ const program_1 = require("../program");
 const orderRoute = (0, express_1.Router)();
 let orderController = new order_controller_1.OrderController(program_1.orderLogic);
 orderRoute.get("/order/:userId", orderController.create);
+orderRoute.get("/history/:userId", orderController.getorderHistory);
 orderRoute.get("/payment/:orderId", orderController.payment);
 orderRoute.get("/confirmpayment", orderController.confirmPayment);
 orderRoute.delete("/remove/:orderId/user/:userId", orderController.removeOrder);

@@ -28,6 +28,10 @@ __decorate([
 ], OrderItemConfig.prototype, "product_id", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], OrderItemConfig.prototype, "product_name", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
     __metadata("design:type", Number)
 ], OrderItemConfig.prototype, "quantity", void 0);
 __decorate([

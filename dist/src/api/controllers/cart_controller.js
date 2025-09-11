@@ -32,10 +32,25 @@ class CartController {
                 res.status(500).json({ error: err.message || "Failed to add item to cart" });
             }
         });
+        this.updateCartItem = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { userId, productId } = req.params;
+                const quantity = req.body.quantity;
+                if (!quantity || quantity < 1) {
+                    res.status(400).json({ error: "Quantity must be at least 1" });
+                }
+                let updateCart = yield this.cart.updateCartItem({ userId, productId, quantity });
+                res.status(200).json({ message: "Item updated successfully", data: updateCart });
+            }
+            catch (err) {
+                res.status(500).json({ error: err.message || "Failed to update item in cart" });
+            }
+        });
         this.removeCartItem = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             try {
-                let requestData = req.body;
-                let updateCart = yield this.cart.removeItemFromCart(requestData);
+                const userId = Number(req.params.userId);
+                const productId = Number(req.params.productId);
+                let updateCart = yield this.cart.removeItemFromCart({ userId, productId });
                 res.status(200).json({ message: "Item removed from cart successfully", data: updateCart });
             }
             catch (err) {
@@ -44,7 +59,7 @@ class CartController {
         });
         this.remove = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             try {
-                let remove = yield this.cart.delete(req.params.cartId);
+                let remove = yield this.cart.delete(req.params.userId);
                 res.status(200).json(remove);
             }
             catch (err) {

@@ -14,6 +14,9 @@ import { OrderItem } from "../../../domain/entity/order_item"
     product_id!:number
 
     @Column()
+    product_name!:string
+
+    @Column()
     quantity!: number
 
     @Column()

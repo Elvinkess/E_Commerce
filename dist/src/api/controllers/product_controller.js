@@ -28,8 +28,22 @@ class ProductController extends base_controller_1.default {
                 res.json({ error: err.message });
             }
         });
+        this.getOne = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const productId = Number(req.params.productId);
+                if (isNaN(productId)) {
+                    res.status(400).json({ error: "Invalid product id" });
+                }
+                let productResponse = yield this.productLogic.getOne(productId);
+                res.status(200).json({ message: "Item updated successfully", data: productResponse });
+            }
+            catch (err) {
+                res.status(500).json({ error: err.message });
+            }
+        });
         this.createProductWithImage = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             try {
+                console.log("in controller");
                 let prodImg = this.convertReqFilesToUploadFiles(req, "image")[0];
                 let reqBody = req.body.data;
                 let createProoductBody = JSON.parse(reqBody);
@@ -50,10 +64,45 @@ class ProductController extends base_controller_1.default {
                 res.json({ error: err.message });
             }
         });
+        this.updateProduct = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const update = req.body.update;
+                let updateProduct = yield this.productLogic.update(update);
+                res.json(updateProduct);
+            }
+            catch (err) {
+                res.json({ error: err.message });
+            }
+        });
         this.getAllproduct = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             try {
                 let Allproducts = yield this.productLogic.getAll();
                 res.json(Allproducts);
+            }
+            catch (err) {
+                res.json({ error: err.message });
+            }
+        });
+        this.getPaginatedProducts = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const page = Number(req.query.page);
+                const limit = Number(req.query.limit);
+                if (isNaN(page) || isNaN(limit)) {
+                    res.status(400).json({ error: "Invalid query parameters. 'page' and 'limit' must be numbers." });
+                }
+                const products = yield this.productLogic.getAllPaginate(page, limit);
+                res.json(products);
+            }
+            catch (err) {
+                res.json({ error: err.message });
+            }
+        });
+        this.remove = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                console.log("in remove");
+                const { productId } = req.params;
+                const response = yield this.productLogic.remove(productId);
+                res.json(response);
             }
             catch (err) {
                 res.json({ error: err.message });

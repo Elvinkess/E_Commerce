@@ -23,6 +23,15 @@ class OrderController {
                 res.json({ error: err.message });
             }
         });
+        this.getorderHistory = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                let order = yield this.order.getOrderHistory(req.params.userId);
+                res.json(order);
+            }
+            catch (err) {
+                res.json({ error: err.message });
+            }
+        });
         this.payment = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             try {
                 let payment = yield this.order.payForOrder(req.params.orderId);

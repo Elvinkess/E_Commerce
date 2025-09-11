@@ -11,6 +11,7 @@ class ProductResponse extends product_1.Product {
         this.id = init.id;
         this.category = (_a = init.category) !== null && _a !== void 0 ? _a : null;
         this.inventory = (_b = init.inventory) !== null && _b !== void 0 ? _b : null;
+        this.outOfStock = init.outOfStock;
     }
 }
 exports.ProductResponse = ProductResponse;

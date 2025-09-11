@@ -4,7 +4,7 @@ import { Address } from "../../core/domain/entity/address"
 
 
     
-    export class  AddressController{
+export class  AddressController{
         constructor(private address:IAddressLogic){}
         createAddress =  async(req : Request<{}, {}, AddressRequest>, res: Response, next: NextFunction)=>{
         try {
@@ -16,6 +16,17 @@ import { Address } from "../../core/domain/entity/address"
         } catch (err) {
             res.json({error: (err as Error).message})
         }
+    }
+    getAddress = async(req:Request<{},{},{},{userId:string}>,res:Response, next:NextFunction)=>{
+         try {
+            const{userId}=req.query
+            const id = Number(userId)
+            const address = await this.address.getAddress(id)
+            res.status(200).json(address)
+         } catch (error) {
+            res.status(500).json({ error: (error as Error).message });
+            
+         }
     }
 
     

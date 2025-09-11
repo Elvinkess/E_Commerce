@@ -5,4 +5,5 @@ import { addressLogic } from "../program";
 const addressRoute = Router();
 let addressController = new AddressController(addressLogic)
 addressRoute.post("/", addressController.createAddress);
+addressRoute.get("/",addressController.getAddress)
 export default addressRoute

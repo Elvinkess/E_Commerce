@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/Elvinkess/E_CommerceApp#readme",
   "devDependencies": {
+    "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.17",
     "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.0",
@@ -45,6 +46,7 @@
     "content-disposition": "^0.5.4",
     "content-type": "^1.0.5",
     "cookie": "^0.7.1",
+    "cookie-parser": "^1.4.7",
     "cookie-signature": "^1.0.6",
     "cors": "^2.8.5",
     "create-require": "^1.1.1",

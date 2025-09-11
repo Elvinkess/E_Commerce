@@ -6,4 +6,5 @@ const program_1 = require("../program");
 const addressRoute = (0, express_1.Router)();
 let addressController = new address_controller_1.AddressController(program_1.addressLogic);
 addressRoute.post("/", addressController.createAddress);
+addressRoute.get("/", addressController.getAddress);
 exports.default = addressRoute;

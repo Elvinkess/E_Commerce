@@ -16,6 +16,18 @@ export class OrderController{
         }
     }
 
+    getorderHistory = async(req : Request<{userId:number}, {},{} >, res: Response, next: NextFunction)=>{
+
+        try {
+            let order = await this.order.getOrderHistory(req.params.userId);
+            res.json(order)
+            
+        } catch (err) {
+            res.json({error: (err as Error).message})
+            
+        }
+    }
+
     payment = async(req : Request<{orderId:number}, {},{} >, res: Response, next: NextFunction)=>{
 
         try {

@@ -29,13 +29,30 @@ export class  CartController{
         } catch (err:any) {
             res.status(500).json({ error: err.message || "Failed to add item to cart" })
         }
-}
+    }
 
-    removeCartItem = async(req : Request<{}, {},RemoveCartItem>, res: Response, next: NextFunction)=>{
+    updateCartItem = async(req : Request<{userId:string,productId:string},{}, {quantity:number} >, res: Response, next: NextFunction)=>{
+        try {
+            const{userId,productId}= req.params
+            const quantity = req.body.quantity
+
+            if (!quantity || quantity < 1) {res.status(400).json({ error: "Quantity must be at least 1" });}
+           
+            let updateCart = await this.cart.updateCartItem({userId,productId,quantity});
+
+            res.status(200).json({message: "Item updated successfully",data: updateCart});
+            
+        } catch (err:any) {
+            res.status(500).json({ error: err.message || "Failed to update item in cart" })
+        }
+    }
+
+    removeCartItem = async(req : Request<{userId:string,productId:string}, {},{}>, res: Response, next: NextFunction)=>{
             
         try {
-            let requestData = req.body
-            let updateCart = await this.cart.removeItemFromCart(requestData);
+            const userId = Number(req.params.userId)
+            const productId = Number(req.params.productId)
+            let updateCart = await this.cart.removeItemFromCart({userId,productId});
             res.status(200).json({message: "Item removed from cart successfully",data: updateCart});
             
         } catch (err:any) {
@@ -43,10 +60,10 @@ export class  CartController{
         }
     }
 
-    remove = async(req : Request<{cartId:number}, {},{} >, res: Response, next: NextFunction)=>{
+    remove = async(req : Request<{userId:number}, {},{} >, res: Response, next: NextFunction)=>{
 
         try {
-            let remove = await this.cart.delete(req.params.cartId);
+            let remove = await this.cart.delete(req.params.userId);
             res.status(200).json(remove)
             
         } catch (err) {

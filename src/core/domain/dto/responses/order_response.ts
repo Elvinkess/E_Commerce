@@ -12,3 +12,13 @@ export class OrderResponse extends Order{
     Order_items!:OrderItemResponse[]
 
 }
+
+
+export class OrderHistoryResponse extends Order{
+    status!:string
+    totalAmountPaid!:number
+    date!:string
+    transactionRef!:string
+    Order_items!:OrderItemResponse[]
+
+}

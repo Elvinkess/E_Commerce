@@ -33,44 +33,76 @@ class OrderLogic {
         this.orderPaymentDB = orderPaymentDB;
         this.deliveryDB = deliveryDB;
         this.cartCache = cartCache;
-        this.get = (userId) => __awaiter(this, void 0, void 0, function* () {
+        this.getOrderHistory = (userId) => __awaiter(this, void 0, void 0, function* () {
             var _a, _b, _c, _d;
+            // get all orders for the user
+            const orders = yield this.orderDB.comparisonSearch({ query: { user_id: userId }, _not: { status: order_items_1.OrderStatus.PENDING } });
+            const orderResponses = [];
+            for (const order of orders) {
+                const orderItems = yield this.orderItemDB.get({ order_id: order.id });
+                // attach product info if
+                const enrichedItems = yield Promise.all(orderItems.map((item) => __awaiter(this, void 0, void 0, function* () {
+                    const product = yield this.productDB.getOne({ id: item.product_id });
+                    return Object.assign(Object.assign({}, item), { product: product !== null && product !== void 0 ? product : undefined });
+                })));
+                // fetch payment info for this order
+                const payment = yield this.orderPaymentDB.getOne({ orderId: order.id });
+                // build OrderHistoryResponse
+                const historyResponse = Object.assign(Object.assign({}, order), { status: (_a = payment === null || payment === void 0 ? void 0 : payment.status) !== null && _a !== void 0 ? _a : order.status, date: (_c = (_b = (payment === null || payment === void 0 ? void 0 : payment.date)) === null || _b === void 0 ? void 0 : _b.toString()) !== null && _c !== void 0 ? _c : "", totalAmountPaid: (payment === null || payment === void 0 ? void 0 : payment.amount) + (payment === null || payment === void 0 ? void 0 : payment.deliveryamount), transactionRef: (_d = payment === null || payment === void 0 ? void 0 : payment.transactionReference) !== null && _d !== void 0 ? _d : "", Order_items: enrichedItems });
+                orderResponses.push(historyResponse);
+            }
+            return orderResponses.reverse();
+        });
+        this.get = (userId) => __awaiter(this, void 0, void 0, function* () {
+            var _a, _b, _c;
             let totalAmount = 0;
             let orderedItems = [];
             let cart = yield this.cartLogic.get(userId);
-            // return existing order if any is available esle  create a new one
+            // Get or create pending order
             let existingOrder = yield this.orderDB.getOne({ user_id: userId, status: order_items_1.OrderStatus.PENDING });
             let savedOrder = existingOrder !== null && existingOrder !== void 0 ? existingOrder : yield this.orderDB.save(new order_1.Order(userId, totalAmount, order_items_1.OrderStatus.PENDING));
-            let OrderItems = yield this.orderItemDB.get({ order_id: savedOrder.id });
-            if (OrderItems.length !== 0) {
-                totalAmount = OrderItems.reduce((acc, item) => acc + item.price, 0);
-                orderedItems = OrderItems;
+            // Get existing order items
+            let existingOrderItems = yield this.orderItemDB.get({ order_id: savedOrder.id });
+            // Map existing items by product id for quick lookup
+            const existingItemsMap = new Map();
+            for (let item of existingOrderItems) {
+                existingItemsMap.set(item.product_id, item);
             }
-            else {
-                for (let cartItem of (_a = cart === null || cart === void 0 ? void 0 : cart.cart_items) !== null && _a !== void 0 ? _a : []) {
-                    let product = cartItem.product;
-                    let prodStatus = cartItem.status;
-                    let date = new Date().toISOString();
-                    if (prodStatus === product_cart_response_1.CartItemStatus.Okay && product) {
-                        let savedOrderedItem = (yield this.orderItemDB.save(new order_item_1.OrderItem(savedOrder.id, product.id, cartItem.quantity, cartItem.quantity * product.price, `${date}`)));
-                        //get  all ordereditems with orderId 
-                        savedOrderedItem.product = cartItem.product;
-                        orderedItems.push(savedOrderedItem);
-                        totalAmount += savedOrderedItem.price;
-                    }
-                    else if (prodStatus === product_cart_response_1.CartItemStatus.LessQuantity && product) {
-                        let message = "Quantity desired not available hence we gave you all we got hurray!";
-                        let quantityAvailable = Math.max(((_d = (_c = (_b = cartItem.product) === null || _b === void 0 ? void 0 : _b.inventory) === null || _c === void 0 ? void 0 : _c.quantity_available) !== null && _d !== void 0 ? _d : 0), 0);
-                        let orderItem = new order_item_1.OrderItem(savedOrder.id, product.id, quantityAvailable, quantityAvailable * product.price, `${date}`, message);
-                        let savedOrderedItem = yield this.orderItemDB.save(orderItem);
-                        savedOrderedItem.product = cartItem.product;
-                        orderedItems.push(savedOrderedItem);
-                        totalAmount += orderItem.price;
-                    }
+            // Go through cart items and add missing items to order
+            for (let cartItem of (_a = cart === null || cart === void 0 ? void 0 : cart.cart_items) !== null && _a !== void 0 ? _a : []) {
+                const product = cartItem.product;
+                const prodStatus = cartItem.status;
+                const date = new Date().toISOString();
+                if (!product)
+                    continue;
+                // If item already in order, just use it
+                if (existingItemsMap.has(product.id)) {
+                    const existingItem = existingItemsMap.get(product.id);
+                    orderedItems.push(existingItem);
+                    totalAmount += existingItem.price;
+                    continue;
                 }
+                // Add new order item based on cart
+                let savedOrderedItem;
+                if (prodStatus === product_cart_response_1.CartItemStatus.Okay) {
+                    savedOrderedItem = (yield this.orderItemDB.save(new order_item_1.OrderItem(savedOrder.id, product.id, product.name, cartItem.quantity, cartItem.quantity * product.price, date)));
+                }
+                else if (prodStatus === product_cart_response_1.CartItemStatus.LessQuantity) {
+                    const quantityAvailable = Math.max((_c = (_b = product.inventory) === null || _b === void 0 ? void 0 : _b.quantity_available) !== null && _c !== void 0 ? _c : 0, 0);
+                    const message = "Quantity desired not available, we gave you all we got!";
+                    savedOrderedItem = (yield this.orderItemDB.save(new order_item_1.OrderItem(savedOrder.id, product.id, product.name, quantityAvailable, quantityAvailable * product.price, date, message)));
+                }
+                else {
+                    continue;
+                }
+                savedOrderedItem.product = product;
+                orderedItems.push(savedOrderedItem);
+                totalAmount += savedOrderedItem.price;
             }
-            let updatedOrder = yield this.orderDB.update({ id: savedOrder.id }, { total_price: totalAmount });
-            let orderResponse = savedOrder;
+            // Update total price
+            yield this.orderDB.update({ id: savedOrder.id }, { total_price: totalAmount });
+            // Return order response
+            const orderResponse = savedOrder;
             orderResponse.Order_items = orderedItems;
             orderResponse.total_price = totalAmount;
             return orderResponse;

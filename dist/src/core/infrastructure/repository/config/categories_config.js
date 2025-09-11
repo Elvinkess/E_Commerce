@@ -14,7 +14,6 @@ const typeorm_1 = require("typeorm");
 let CategoriesConfig = class CategoriesConfig extends typeorm_1.BaseEntity {
     constructor() {
         super(...arguments);
-        //   @OneToMany(() => Product, (product) => product.category_id)
         this.products = [];
     }
 };
@@ -24,7 +23,7 @@ __decorate([
     __metadata("design:type", Number)
 ], CategoriesConfig.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ unique: true }),
     __metadata("design:type", String)
 ], CategoriesConfig.prototype, "name", void 0);
 __decorate([

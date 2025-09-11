@@ -6,6 +6,7 @@ import { searchProductsQuery } from "../../core/domain/dto/requests/search_reque
 import { Product } from "../../core/domain/entity/product";
 import BaseController from "./base_controller";
 import UploadFile from "../../core/domain/entity/shared/uploadfile";
+import { updateProductReq } from "../../core/domain/dto/requests/update_product";
 
 // uses the usecase to make appropriate calls from the client (express)
 export class ProductController extends BaseController {
@@ -24,9 +25,23 @@ export class ProductController extends BaseController {
             res.json({error: (err as Error).message})
         }
     }
+    getOne= async (req : Request<{productId:string}, {}, {}>, res: Response, next: NextFunction) => {
+        try{
+            const productId = Number(req.params.productId)
+            if (isNaN(productId)) {
+                res.status(400).json({ error: "Invalid product id" });
+              }
+              
+            let productResponse: ProductResponse = await this.productLogic.getOne(productId);
+            res.status(200).json({message: "Item updated successfully",data:productResponse});
+        } catch(err:any){
+            res.status(500).json({ error: err.message })
+        }
+    }
     createProductWithImage = async (req : Request<{}, {}>, res: Response, next: NextFunction) => {
         
         try{
+            console.log("in controller")
             let prodImg: UploadFile | null = this.convertReqFilesToUploadFiles(req, "image")[0]
             let reqBody = req.body.data;
             let createProoductBody = JSON.parse(reqBody) as CreateProduct
@@ -45,12 +60,43 @@ export class ProductController extends BaseController {
             res.json({error: (err as Error).message})
         }
     }
+    updateProduct= async (req:Request<{},{},{update:updateProductReq}>,res:Response,next:NextFunction)=>{
+        try {
+            const update = req.body.update
+            let updateProduct = await this.productLogic.update(update)
+            res.json(updateProduct);
+            
+        } catch (err) {
+            res.json({error: (err as Error).message})
+        }
+    }
 
-    getAllproduct= async (req:Request<{},{},{id:number}>,res:Response,next:NextFunction)=>{
+    getAllproduct= async (req:Request<{},{},{}>,res:Response,next:NextFunction)=>{
         try {
             let Allproducts = await this.productLogic.getAll()
             res.json(Allproducts);
             
+        } catch (err) {
+            res.json({error: (err as Error).message})
+        }
+    }
+    getPaginatedProducts = async(req:Request<{},{},{},{page:number,limit:number}>,res:Response,next:NextFunction)=>{
+        try {
+            const page = Number(req.query.page)
+            const limit = Number(req.query.limit)
+            if (isNaN(page) || isNaN(limit)) {  res.status(400).json({ error: "Invalid query parameters. 'page' and 'limit' must be numbers." });}
+            const products = await this.productLogic.getAllPaginate(page,limit)
+            res.json(products)
+        } catch (err) {
+            res.json({error: (err as Error).message})
+        }
+    }
+    remove= async(req:Request<{productId:number},{},{}>,res:Response,next:NextFunction)=>{
+        try {
+            console.log("in remove")
+            const{productId}= req.params
+            const response = await this.productLogic.remove(productId)
+            res.json(response)
         } catch (err) {
             res.json({error: (err as Error).message})
         }

@@ -1,5 +1,5 @@
 import { CreateOrderPaymentresponse } from "../../domain/dto/responses/order_payment_responses";
-import { OrderItemResponse, OrderResponse } from "../../domain/dto/responses/order_response";
+import { OrderHistoryResponse, OrderItemResponse, OrderResponse } from "../../domain/dto/responses/order_response";
 import { CartItemStatus } from "../../domain/dto/responses/product_cart_response";
 import { delivery_status } from "../../domain/entity/delivery";
 import { Order } from "../../domain/entity/order";
@@ -27,62 +27,114 @@ export class OrderLogic implements IOrderLogic{
     constructor(private orderDB:IOrderDB,private orderItemDB:IOrderItemDB,private  cartDB:ICartDB,private productDB:IProductDB,private userDB:IUserDb,private cartLogic:ICartLogic,private inventoryDB:IInventoryDB,private deliveryLogic:IDeliveryLogic,private paymentLogic:IPaymentLogic,private orderPaymentDB:IOrderPaymentDB,private deliveryDB:IDeliveryDB,private cartCache:ICartCache){
         
     }
-    get = async (userId: number): Promise<OrderResponse> => {
+    getOrderHistory = async (userId: number): Promise<OrderHistoryResponse[]> => {
+      // get all orders for the user
+      const orders = await this.orderDB.comparisonSearch({query:{user_id: userId },_not:{status:OrderStatus.PENDING} });
+    
+      const orderResponses: OrderHistoryResponse[] = [];
+    
+      for (const order of orders) {
+        const orderItems = await this.orderItemDB.get({ order_id: order.id });
         
-        let totalAmount = 0;
-        let orderedItems :  OrderItem[] = []
-        
-        let cart = await this.cartLogic.get(userId);
-
-
-        // return existing order if any is available esle  create a new one
-        let existingOrder = await  this.orderDB.getOne({user_id:userId,status:OrderStatus.PENDING})
-       
-        let savedOrder = existingOrder ??  await this.orderDB.save(new Order(userId,totalAmount,OrderStatus.PENDING)) 
-
-        let OrderItems = await  this.orderItemDB.get({order_id:savedOrder.id})
-        if(OrderItems.length !== 0){
-          totalAmount = OrderItems.reduce((acc, item) => acc + item.price, 0);
-          orderedItems = OrderItems
-
-        }else{
-
-          for(let cartItem  of cart?.cart_items  ?? []){
-            let product = cartItem.product
-            let prodStatus = cartItem.status
-            let date =  new Date().toISOString();
-
-
-            if(prodStatus === CartItemStatus.Okay && product){             
-              let savedOrderedItem = ( await this.orderItemDB.save(new OrderItem(savedOrder.id,product.id,cartItem.quantity,cartItem.quantity*product.price,`${date}`))) as OrderItemResponse 
-              //get  all ordereditems with orderId 
-              savedOrderedItem.product = cartItem.product
-              orderedItems.push(savedOrderedItem)
-              totalAmount += savedOrderedItem.price 
-                
-              
-
-
-            }else if (prodStatus === CartItemStatus.LessQuantity && product){
-
-                let message = "Quantity desired not available hence we gave you all we got hurray!"
-                let quantityAvailable = Math.max((cartItem.product?.inventory?.quantity_available ?? 0),0)
-                let orderItem =  new OrderItem(savedOrder.id,product.id,quantityAvailable,quantityAvailable * product.price,`${date}`,message)
-                let savedOrderedItem = await this.orderItemDB.save(orderItem) as OrderItemResponse
-                savedOrderedItem.product = cartItem.product
-                orderedItems.push(savedOrderedItem)
-                totalAmount += orderItem.price 
-
-              
-            }
-        }
+        // attach product info if
+        const enrichedItems = await Promise.all(
+          orderItems.map(async (item) => {
+            const product = await this.productDB.getOne({ id: item.product_id });
+            return { ...item,  product: product ?? undefined } as OrderItemResponse;
+          })
+        );
+    
+        // fetch payment info for this order
+        const payment = await this.orderPaymentDB.getOne({ orderId: order.id });
+    
+        // build OrderHistoryResponse
+        const historyResponse: OrderHistoryResponse = {
+          ...order,
+          status: payment?.status ?? order.status, // fallback to order.status
+          date: (payment?.date)?.toString() ?? "",
+          totalAmountPaid: payment?.amount! + payment?.deliveryamount!,
+          transactionRef: payment?.transactionReference ?? "",
+          Order_items: enrichedItems,
+        };
+    
+        orderResponses.push(historyResponse);
       }
-        let updatedOrder = await  this.orderDB.update({id:savedOrder.id},{total_price:totalAmount})
-        let orderResponse = savedOrder as OrderResponse
-        orderResponse.Order_items = orderedItems
-        orderResponse.total_price = totalAmount
-        return orderResponse
+
+    
+      return orderResponses.reverse();
+    };
+    
+    
+
+
+
+    get = async (userId: number): Promise<OrderResponse> => {
+      let totalAmount = 0;
+      let orderedItems: OrderItemResponse[] = [];
+    
+      let cart = await this.cartLogic.get(userId);
+    
+      // Get or create pending order
+      let existingOrder = await this.orderDB.getOne({user_id: userId, status: OrderStatus.PENDING});
+      let savedOrder = existingOrder ?? await this.orderDB.save(new Order(userId, totalAmount, OrderStatus.PENDING));
+    
+      // Get existing order items
+      let existingOrderItems = await this.orderItemDB.get({order_id: savedOrder.id});
+    
+      // Map existing items by product id for quick lookup
+      const existingItemsMap = new Map<number, OrderItemResponse>();
+      for (let item of existingOrderItems) {
+        existingItemsMap.set(item.product_id, item);
+      }
+    
+      // Go through cart items and add missing items to order
+      for (let cartItem of cart?.cart_items ?? []) {
+        const product = cartItem.product;
+        const prodStatus = cartItem.status;
+        const date = new Date().toISOString();
+    
+        if (!product) continue;
+    
+        // If item already in order, just use it
+        if (existingItemsMap.has(product.id)) {
+          const existingItem = existingItemsMap.get(product.id)!;
+          orderedItems.push(existingItem);
+          totalAmount += existingItem.price;
+          continue;
+        }
+    
+        // Add new order item based on cart
+        let savedOrderedItem: OrderItemResponse;
+        if (prodStatus === CartItemStatus.Okay) {
+          savedOrderedItem = await this.orderItemDB.save(
+            new OrderItem(savedOrder.id, product.id, product.name, cartItem.quantity, cartItem.quantity * product.price, date)
+          ) as OrderItemResponse;
+        } else if (prodStatus === CartItemStatus.LessQuantity) {
+          const quantityAvailable = Math.max(product.inventory?.quantity_available ?? 0, 0);
+          const message = "Quantity desired not available, we gave you all we got!";
+          savedOrderedItem = await this.orderItemDB.save(
+            new OrderItem(savedOrder.id, product.id, product.name, quantityAvailable, quantityAvailable * product.price, date, message)
+          ) as OrderItemResponse;
+        } else {
+          continue;
+        }
+    
+        savedOrderedItem.product = product;
+        orderedItems.push(savedOrderedItem);
+        totalAmount += savedOrderedItem.price;
+      }
+    
+      // Update total price
+      await this.orderDB.update({id: savedOrder.id}, {total_price: totalAmount});
+    
+      // Return order response
+      const orderResponse = savedOrder as OrderResponse;
+      orderResponse.Order_items = orderedItems;
+      orderResponse.total_price = totalAmount;
+    
+      return orderResponse;
     }
+    
 
     remove = async (orderId: number, userId: number): Promise<string> => {
 

@@ -10,7 +10,8 @@ const validator = new Validator()
 const userController = new UserController(userLogic)
 userRoute.post("/",validator.signValidation,validator.validate, userController.createUser)
 userRoute.post("/signin", userController.signInUser)
-userRoute.get("/protected",authmiddleware.authenticateJWT, authmiddleware.authorizeRole([UserRole.USER]), (req, res) => {
+userRoute.get("/decode",userController.decodeUser)
+userRoute.get("/protected",authmiddleware.authenticateJWT, authmiddleware.authorizeRole([UserRole.ADMIN]), (req, res) => {
     res.json({ message: "You have access to this protected route!" });
   });
 

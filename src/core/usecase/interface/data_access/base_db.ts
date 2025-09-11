@@ -6,6 +6,8 @@ export interface IBaseDb<TEntity> {
     remove (query: Partial<{[key in keyof TEntity]: any}>): Promise<TEntity>;
     removeMany (query: Partial<{ [key in keyof TEntity]: any; }>): Promise<TEntity[]> 
     update  (query:Partial<{[key in keyof TEntity]:any}>,keyToUpdate:Partial<{[key in keyof TEntity]:any}>) : Promise<TEntity | null>
-    comparisonSearch(options: {query?: Partial<{ [key in keyof TEntity]: any; }>, contains?: Partial<{[key in keyof TEntity]: string}>, numberComparison?: Partial<{[key in keyof TEntity]: {gt?: number, lt?: number, gte?: number, lte: number}}>, _in?: Partial<{[key in keyof TEntity]: any[]}>}): Promise<TEntity[]>
+    findPaginated(page: number, limit: number): Promise<[TEntity[], number]>;
+
+    comparisonSearch(options: {query?: Partial<{ [key in keyof TEntity]: any; }>, contains?: Partial<{[key in keyof TEntity]: string}>, numberComparison?: Partial<{[key in keyof TEntity]: {gt?: number, lt?: number, gte?: number, lte: number}}>, _in?: Partial<{[key in keyof TEntity]: any[]}>,  _not?: Partial<{ [key in keyof TEntity]: any }>;}): Promise<TEntity[]>
 
 }

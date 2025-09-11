@@ -8,6 +8,8 @@ import cartRoute from "./src/api/routes/cart_route";
 import orderRoute from "./src/api/routes/order_route";
 import deliveryRoute from "./src/api/routes/delivery_route";
 import addressRoute from "./src/api/routes/address_route";
+import cookieParser from "cookie-parser";
+
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -15,7 +17,12 @@ dotenv.config();
 const app = express()
 
 app.use(express.json());
-app.use(cors())
+app.use(cors({
+    origin: "http://localhost:3000", // frontend URL
+    credentials: true,                // allow cookies
+}));
+app.use(cookieParser());
+
 
 app.use("/user", userRoute)
 app.use("/categories",categoriesRoute)

@@ -1,5 +1,5 @@
 import { Repository } from "typeorm/repository/Repository";
-import {  BaseEntity, DataSource, EntityTarget, ILike, In, LessThan, LessThanOrEqual, Like, MoreThan, MoreThanOrEqual, ObjectLiteral } from "typeorm";
+import {  BaseEntity, DataSource, EntityTarget, ILike, In, LessThan, LessThanOrEqual, Like, MoreThan, MoreThanOrEqual, Not, ObjectLiteral } from "typeorm";
 import { IBaseDb } from "../../../usecase/interface/data_access/base_db";
 
 
@@ -42,6 +42,16 @@ export class BaseDb<TEntity extends BaseEntity> implements IBaseDb<TEntity>{
           await this.model.update(query,keyToUpdate)
           return await this.model.findOneBy(query);
     }
+
+    findPaginated =async(page: number, limit: number): Promise<[TEntity[], number]>=> {
+        const [entities, total] = await this.model.findAndCount({
+            skip: (page - 1) * limit,
+            take: limit,
+          });
+        
+          return [entities, total];
+        
+    }
     
     _comparisonSearch = async (query: Partial<{ [key in keyof TEntity]: any; }> = {}, contains: Partial<{[key in keyof TEntity]: string}> = {}, numberComparison: Partial<{[key in keyof TEntity]: {gt?: number, lt?: number, gte?: number, lte: number}}> = {}, _in: Partial<{[key in keyof TEntity]: any[]}> = {}): Promise<TEntity[]> =>{
         let searchQuery: Partial<{ [key in keyof TEntity]: any; }>= {}
@@ -77,7 +87,7 @@ export class BaseDb<TEntity extends BaseEntity> implements IBaseDb<TEntity>{
         return await this.model.findBy(searchQuery);
     }
 
-    comparisonSearch = async (options: {query?: Partial<{ [key in keyof TEntity]: any; }>, contains?: Partial<{[key in keyof TEntity]: string}>, numberComparison?: Partial<{[key in keyof TEntity]: {gt?: number, lt?: number, gte?: number, lte: number}}>, _in?: Partial<{[key in keyof TEntity]: any[]}>}): Promise<TEntity[]> =>{
+    comparisonSearch = async (options: {query?: Partial<{ [key in keyof TEntity]: any; }>, contains?: Partial<{[key in keyof TEntity]: string}>, numberComparison?: Partial<{[key in keyof TEntity]: {gt?: number, lt?: number, gte?: number, lte: number}}>, _in?: Partial<{[key in keyof TEntity]: any[]}>,_not?: Partial<{[key in keyof TEntity]: any}> }): Promise<TEntity[]> =>{
         let searchQuery: Partial<{ [key in keyof TEntity]: any; }>= {}
 
         for(let [key, value]  of Object.entries(options.query ?? {})){
@@ -105,6 +115,9 @@ export class BaseDb<TEntity extends BaseEntity> implements IBaseDb<TEntity>{
 
         for(let [key, value]  of Object.entries(options._in ?? {})){
             searchQuery[key as unknown as keyof TEntity] = In(value)
+        }
+        for(let[key, value] of Object.entries(options._not ?? {})){
+            searchQuery[key as unknown as keyof TEntity] = Not(value)
         }
 
 

@@ -26,10 +26,35 @@ class UserController {
         this.signInUser = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             try {
                 let signInUserResponse = yield this.userLogic.signInUser(req.body);
-                res.json(signInUserResponse);
+                const { token, email, username, id } = signInUserResponse;
+                res.cookie("token", token, {
+                    httpOnly: true, // prevents JS access
+                    secure: process.env.NODE_ENV === "production", // set true if using HTTPS
+                    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+                    maxAge: 60 * 60 * 1000, // 1 hour
+                });
+                res.json({
+                    message: "Login successful",
+                    user: { email, username, id },
+                });
             }
             catch (ex) {
-                res.json({ error: ex.message });
+                res.status(400).json({ error: ex.message });
+            }
+        });
+        this.decodeUser = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            try {
+                const token = (_a = req.cookies) === null || _a === void 0 ? void 0 : _a.token;
+                if (!token) {
+                    res.status(401).json({ message: "Unauthorized" });
+                    return;
+                }
+                const payload = this.userLogic.decodedjwt(token);
+                res.json({ user: payload });
+            }
+            catch (err) {
+                res.status(400).json({ error: err.message });
             }
         });
     }

@@ -12,12 +12,17 @@ const cart_route_1 = __importDefault(require("./src/api/routes/cart_route"));
 const order_route_1 = __importDefault(require("./src/api/routes/order_route"));
 const delivery_route_1 = __importDefault(require("./src/api/routes/delivery_route"));
 const address_route_1 = __importDefault(require("./src/api/routes/address_route"));
+const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 // const express = require('express')
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
-app.use((0, cors_1.default)());
+app.use((0, cors_1.default)({
+    origin: "http://localhost:3000", // frontend URL
+    credentials: true, // allow cookies
+}));
+app.use((0, cookie_parser_1.default)());
 app.use("/user", user_route_1.default);
 app.use("/categories", categories_route_1.default);
 app.use("/product", product_route_1.default);

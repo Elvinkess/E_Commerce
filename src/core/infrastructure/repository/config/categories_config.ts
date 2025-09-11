@@ -7,14 +7,13 @@ export class CategoriesConfig extends BaseEntity  implements Categories {
     @PrimaryGeneratedColumn()
     id!: number
 
-    @Column()
+    @Column({ unique: true })
     name!: string
 
     @Column()
     description!: string
 
     
-//   @OneToMany(() => Product, (product) => product.category_id)
 
     products: Product[] = []
 

@@ -1,5 +1,6 @@
 import { addItemCartRequest } from "../../domain/dto/requests/add_cart_item";
 import { RemoveCartItem } from "../../domain/dto/requests/remove_cart_item";
+import { UpdateCartItem } from "../../domain/dto/requests/update_cart_item";
 import { CartItemResponse, CartResponse, productInCartRes } from "../../domain/dto/responses/product_cart_response";
 import { Cart } from "../../domain/entity/cart";
 import { CartItem } from "../../domain/entity/cart_item";
@@ -18,10 +19,6 @@ export class CartLogic implements ICartLogic{
     constructor(private cartDB: ICartDB,private userDB:IUserDb,private  cartItemDB:ICartItemDB,private productDB:IProductDB,private productlogic:IProductLogic,  private cartCache: ICartCache,private inventoryDB:IInventoryDB ){
 
     }
- 
-  
-
-
     get= async (userId:number): Promise< CartResponse | null>=>{
       //hit the redis server to get cart before the DB
       const cachedCart = await this.cartCache.getCartResponse(userId);
@@ -94,51 +91,63 @@ export class CartLogic implements ICartLogic{
       return updatedCart;
     };
     
+    updateCartItem = async(req: UpdateCartItem): Promise<CartResponse>=> {
+      const userId = Number(req.userId)
+      const productId = Number(req.productId)
+      
+      const cart = await this.cartDB.getOne({user_id:userId,user_status:cart_status.ACTIVE})
+      if(!cart){throw new Error("cart not found")}
 
-  removeItemFromCart = async (req:RemoveCartItem): Promise<CartResponse> => {
-    const{userId,productId,quantity}= req
+      const cartItem = await this.cartItemDB.getOne({cart_id:cart.id,product_id:productId})
+      if(!cartItem){throw new Error("cart item not found")}
 
-    let user = await this.userDB.get({ id: userId });
-    if (!user.length) throw new Error("User does not exist");
-  
-    let cart = await this.cartDB.getOne({ user_id: userId, user_status: cart_status.ACTIVE });
-    if (!cart) throw new Error("Cart does not exist");
-  
-    let cartItem = await this.cartItemDB.getOne({cart_id: cart.id,product_id: productId});
+      await this.cartItemDB.update({id:cartItem.id},{quantity:req.quantity})
+      await this.cartCache.clearCart(userId);
 
-    if (!cartItem) throw new Error("Product not found in cart");
+      const updatedCart = await this.get(userId);
+      if (!updatedCart) throw new Error("Failed to retrieve updated cart");
 
-    if (quantity !== undefined && quantity > 0) {
-      if (quantity < cartItem.quantity) {
-        // reduce quantity
-        let newQuantity = cartItem.quantity - quantity;
-       await this.cartItemDB.update({ id: cartItem.id }, { quantity: newQuantity });
-      } else if (quantity === cartItem.quantity) {
-        // remove item completely
-        await this.cartItemDB.remove({ id: cartItem.id });
-      } else {
-        throw new Error("Quantity to remove exceeds quantity in cart");
-      }
-    } else {
-      //  if no valid quantity is given, remove the item
-      await this.cartItemDB.remove({ id: cartItem.id });
+      return updatedCart;
+
     }
     
 
-    await this.cartCache.clearCart(userId);
-    let updatedCart = await this.get(userId);
-    if (!updatedCart) throw new Error("Failed to retrieve updated cart");
-    return updatedCart
-  };
+    removeItemFromCart = async (req: RemoveCartItem): Promise<CartResponse> => {
+      const { userId, productId } = req;
+    
+      // Step 1: Get active cart for this user
+      const cart = await this.cartDB.getOne({
+        user_id: userId,
+        user_status: cart_status.ACTIVE
+      });
+      if (!cart) throw new Error("Cart does not exist");
+    
+      // Step 2: Check if product is in cart
+      const cartItem = await this.cartItemDB.getOne({
+        cart_id: cart.id,
+        product_id: productId
+      });
+      if (!cartItem) throw new Error("Product not found in cart");
+    
+      // Step 3: Remove item completely
+      await this.cartItemDB.remove({ id: cartItem.id });
+    
+      // Step 4: Clear cache and return updated cart
+      await this.cartCache.clearCart(userId);
+      const updatedCart = await this.get(userId);
+      if (!updatedCart) throw new Error("Failed to retrieve updated cart");
+    
+      return updatedCart;
+    };
+    
   
     
     
-  delete  = async  (cartId: number): Promise<Cart> =>{
+  delete  = async  (userId: number): Promise<Cart> =>{
 
-    let cart = await  this.cartDB.getOne({id:cartId});
-    if(!cart){ throw new Error("There's no  cart with this Id  number")}
-    if(cart?.user_status !==  cart_status.ACTIVE){ throw new Error("Cannot deleted a  cart whose status is  Active")}
-    let cartToRemove = await this.cartDB.remove({id:cartId})
+    let cart = await  this.cartDB.getOne({user_id:userId,user_status:cart_status.ACTIVE});
+    if(!cart){ throw new Error("There's no active  cart")}
+    let cartToRemove = await this.cartDB.remove({id:cart.id})
     await this.cartCache.clearCart(cart.user_id); // Clears the redit server from serfing same cart if it was present 
     return cartToRemove
   }

@@ -22,6 +22,17 @@ class AddressController {
                 res.json({ error: err.message });
             }
         });
+        this.getAddress = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { userId } = req.query;
+                const id = Number(userId);
+                const address = yield this.address.getAddress(id);
+                res.status(200).json(address);
+            }
+            catch (error) {
+                res.status(500).json({ error: error.message });
+            }
+        });
     }
 }
 exports.AddressController = AddressController;

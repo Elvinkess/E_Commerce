@@ -36,7 +36,7 @@ export class UserLogic implements IUserLogic{
         return hmac.update(password).digest('hex').toString();
     }
 
-encryptDataUsingJWT = async (data:JwtPayload, durationInSeconds: number): Promise<string> => {
+    encryptDataUsingJWT = async (data:JwtPayload, durationInSeconds: number): Promise<string> => {
 
         let secret = process.env.JWT_SECRET!
         let encrypted = jwt.sign(
@@ -46,7 +46,7 @@ encryptDataUsingJWT = async (data:JwtPayload, durationInSeconds: number): Promis
           return encrypted;
     }
 
-    decodedjwt = (token:string):JwtPayload =>{
+     decodedjwt = (token:string):JwtPayload =>{
         let secret = process.env.JWT_SECRET!
         return jwt.verify(token, secret) as JwtPayload
     }
@@ -81,6 +81,7 @@ encryptDataUsingJWT = async (data:JwtPayload, durationInSeconds: number): Promis
        
         
         return {
+            id:user.id,
             email: user.email,
             username: user.username,
             role:user.role,

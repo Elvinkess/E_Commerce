@@ -81,50 +81,55 @@ class CartLogic {
                 throw new Error("Failed to retrieve updated cart");
             return updatedCart;
         });
-        this.removeItemFromCart = (req) => __awaiter(this, void 0, void 0, function* () {
-            const { userId, productId, quantity } = req;
-            let user = yield this.userDB.get({ id: userId });
-            if (!user.length)
-                throw new Error("User does not exist");
-            let cart = yield this.cartDB.getOne({ user_id: userId, user_status: cart_status_enum_1.cart_status.ACTIVE });
-            if (!cart)
-                throw new Error("Cart does not exist");
-            let cartItem = yield this.cartItemDB.getOne({ cart_id: cart.id, product_id: productId });
-            if (!cartItem)
-                throw new Error("Product not found in cart");
-            if (quantity !== undefined && quantity > 0) {
-                if (quantity < cartItem.quantity) {
-                    // reduce quantity
-                    let newQuantity = cartItem.quantity - quantity;
-                    yield this.cartItemDB.update({ id: cartItem.id }, { quantity: newQuantity });
-                }
-                else if (quantity === cartItem.quantity) {
-                    // remove item completely
-                    yield this.cartItemDB.remove({ id: cartItem.id });
-                }
-                else {
-                    throw new Error("Quantity to remove exceeds quantity in cart");
-                }
+        this.updateCartItem = (req) => __awaiter(this, void 0, void 0, function* () {
+            const userId = Number(req.userId);
+            const productId = Number(req.productId);
+            const cart = yield this.cartDB.getOne({ user_id: userId, user_status: cart_status_enum_1.cart_status.ACTIVE });
+            if (!cart) {
+                throw new Error("cart not found");
             }
-            else {
-                //  if no valid quantity is given, remove the item
-                yield this.cartItemDB.remove({ id: cartItem.id });
+            const cartItem = yield this.cartItemDB.getOne({ cart_id: cart.id, product_id: productId });
+            if (!cartItem) {
+                throw new Error("cart item not found");
             }
+            yield this.cartItemDB.update({ id: cartItem.id }, { quantity: req.quantity });
             yield this.cartCache.clearCart(userId);
-            let updatedCart = yield this.get(userId);
+            const updatedCart = yield this.get(userId);
             if (!updatedCart)
                 throw new Error("Failed to retrieve updated cart");
             return updatedCart;
         });
-        this.delete = (cartId) => __awaiter(this, void 0, void 0, function* () {
-            let cart = yield this.cartDB.getOne({ id: cartId });
+        this.removeItemFromCart = (req) => __awaiter(this, void 0, void 0, function* () {
+            const { userId, productId } = req;
+            // Step 1: Get active cart for this user
+            const cart = yield this.cartDB.getOne({
+                user_id: userId,
+                user_status: cart_status_enum_1.cart_status.ACTIVE
+            });
+            if (!cart)
+                throw new Error("Cart does not exist");
+            // Step 2: Check if product is in cart
+            const cartItem = yield this.cartItemDB.getOne({
+                cart_id: cart.id,
+                product_id: productId
+            });
+            if (!cartItem)
+                throw new Error("Product not found in cart");
+            // Step 3: Remove item completely
+            yield this.cartItemDB.remove({ id: cartItem.id });
+            // Step 4: Clear cache and return updated cart
+            yield this.cartCache.clearCart(userId);
+            const updatedCart = yield this.get(userId);
+            if (!updatedCart)
+                throw new Error("Failed to retrieve updated cart");
+            return updatedCart;
+        });
+        this.delete = (userId) => __awaiter(this, void 0, void 0, function* () {
+            let cart = yield this.cartDB.getOne({ user_id: userId, user_status: cart_status_enum_1.cart_status.ACTIVE });
             if (!cart) {
-                throw new Error("There's no  cart with this Id  number");
+                throw new Error("There's no active  cart");
             }
-            if ((cart === null || cart === void 0 ? void 0 : cart.user_status) !== cart_status_enum_1.cart_status.ACTIVE) {
-                throw new Error("Cannot deleted a  cart whose status is  Active");
-            }
-            let cartToRemove = yield this.cartDB.remove({ id: cartId });
+            let cartToRemove = yield this.cartDB.remove({ id: cart.id });
             yield this.cartCache.clearCart(cart.user_id); // Clears the redit server from serfing same cart if it was present 
             return cartToRemove;
         });

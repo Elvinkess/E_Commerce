@@ -70,6 +70,7 @@ class UserLogic {
             console.log(dataToEncrypt);
             let encryptedData = yield this.encryptDataUsingJWT(dataToEncrypt, expirationInSeconds);
             return {
+                id: user.id,
                 email: user.email,
                 username: user.username,
                 role: user.role,

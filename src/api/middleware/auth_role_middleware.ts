@@ -48,7 +48,8 @@ export  function authorizeRole  (roles: UserRole[]){
       }
     }
      authenticateJWT = async (req: AuthRequest, res: Response, next: NextFunction) :Promise<any> => {
-      const token = req.header("Authorization")?.split(" ")[1];
+      const token = req.cookies?.token;
+      console.log(token,"--token---")
     
       if (!token) {
         return res.status(401).json({ message: "Access token is missing" });
