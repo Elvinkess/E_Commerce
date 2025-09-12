@@ -7,14 +7,15 @@ const redisClient = createClient({
     rejectUnauthorized: false // Sometimes needed if SSL cert causes issues
   }
 });
+redisClient.on("connect", () => {
+  console.log("✅ Connected to Redis,",process.env.REDIS_URL);
+});
 
 redisClient.on("error", (err) => {
   console.error("❌ Redis connection error:", err);
 });
 
-redisClient.on("connect", () => {
-  console.log("✅ Connected to Redis");
-});
+
 
 // Initiate the connection
 redisClient.connect().catch(console.error);
