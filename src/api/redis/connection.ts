@@ -1,4 +1,5 @@
 import { createClient } from "redis";
+console.log("REDIS_URL from env:", process.env.REDIS_URL);
 
 const redisClient = createClient({
   url:process.env.REDIS_CONNECTION, /*"redis://localhost:6379"*/ // default local Redis
