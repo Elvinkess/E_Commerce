@@ -12,6 +12,7 @@ import { AddressConfig } from "../core/infrastructure/repository/config/address_
 import { DeliveryConfig } from "../core/infrastructure/repository/config/delivery_config"
 import dotenv from 'dotenv';
 dotenv.config();
+console.log(process.env.DATABASE_URL,"render connection")
 
 const AppDataSource = new DataSource({
     type: "postgres",
