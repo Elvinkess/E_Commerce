@@ -11,8 +11,11 @@ import { OrderPaymentConfig } from "../core/infrastructure/repository/config/ord
 import { AddressConfig } from "../core/infrastructure/repository/config/address_config"
 import { DeliveryConfig } from "../core/infrastructure/repository/config/delivery_config"
 import dotenv from 'dotenv';
-dotenv.config();
-console.log(process.env.DATABASE_URL,"render connection")
+if (process.env.NODE_ENV !== "production") {
+    import("dotenv").then(dotenv => dotenv.config());
+  }
+console.log(`DATABASE_URL at runtime: '${process.env.DATABASE_URL}'`);
+
 
 const AppDataSource = new DataSource({
     type: "postgres",
