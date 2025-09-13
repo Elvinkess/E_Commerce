@@ -25,9 +25,8 @@ const AppDataSource = new DataSource({
     entities: [UserConfig,CategoriesConfig, ProductConfig, InventoryConfig,CartConfig,CartItemConfig,OrderConfig,OrderItemConfig,OrderPaymentConfig,AddressConfig,DeliveryConfig],
     synchronize: false,
     logging: false,
-    extra: {
-        ssl: { rejectUnauthorized: false }, // required for Render Postgres
-      }
+    ssl: { rejectUnauthorized: false }, // required for Render Postgres
+      
 })
 
 AppDataSource.initialize()
