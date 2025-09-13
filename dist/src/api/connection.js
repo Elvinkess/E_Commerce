@@ -26,11 +26,11 @@ const address_config_1 = require("../core/infrastructure/repository/config/addre
 const delivery_config_1 = require("../core/infrastructure/repository/config/delivery_config");
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
-console.log(process.env.DATABASE_URL, "render connection");
+console.log(`DATABASE_URL at runtime: '${process.env.DATABASE_URL}'`);
 const AppDataSource = new typeorm_1.DataSource({
     type: "postgres",
     url: process.env.DATABASE_URL_EX, //connection string for hosted DBs
-    host: process.env.HOSTNAME || "localhost",
+    //host: process.env.HOSTNAME || "localhost",
     // port: parseInt(process.env.PGPORT || "5432", 10),
     //username: process.env.USERNAME || "postgres",
     //password:process.env.PASSWORD_DB,
@@ -38,8 +38,8 @@ const AppDataSource = new typeorm_1.DataSource({
     entities: [user_config_1.UserConfig, categories_config_1.CategoriesConfig, product_config_1.ProductConfig, inventory_config_1.InventoryConfig, cart_config_1.CartConfig, cart_item_configs_1.CartItemConfig, order_1.OrderConfig, order_item_config_1.OrderItemConfig, order_payment_config_1.OrderPaymentConfig, address_config_1.AddressConfig, delivery_config_1.DeliveryConfig],
     synchronize: false,
     logging: false,
-    ssl: {
-        rejectUnauthorized: false, // Required for hosted DBs like Render or Supabase
+    extra: {
+        ssl: { rejectUnauthorized: false }, // required for Render Postgres
     }
 });
 AppDataSource.initialize()

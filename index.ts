@@ -10,17 +10,18 @@ import deliveryRoute from "./src/api/routes/delivery_route";
 import addressRoute from "./src/api/routes/address_route";
 import cookieParser from "cookie-parser";
 
-
 import dotenv from 'dotenv';
 dotenv.config();
 // const express = require('express')
 const app = express()
 
-
+const allowedOrigins = [
+    "http://localhost:3000",
+  ];
 
 app.use(express.json());
 app.use(cors({
-    origin:'https://ecommerce-frontend-blue-phi.vercel.app',// frontend URL
+    origin:"https://ecommerce-frontend-blue-phi.vercel.app",// frontend URL
     credentials: true,                // allow cookies
 }));
 app.use(cookieParser());

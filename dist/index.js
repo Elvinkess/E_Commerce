@@ -17,9 +17,12 @@ const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 // const express = require('express')
 const app = (0, express_1.default)();
+const allowedOrigins = [
+    "http://localhost:3000",
+];
 app.use(express_1.default.json());
 app.use((0, cors_1.default)({
-    origin: '*', // frontend URL
+    origin: "http://localhost:3000", // frontend URL
     credentials: true, // allow cookies
 }));
 app.use((0, cookie_parser_1.default)());

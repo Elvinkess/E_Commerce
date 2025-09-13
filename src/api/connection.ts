@@ -11,20 +11,17 @@ import { OrderPaymentConfig } from "../core/infrastructure/repository/config/ord
 import { AddressConfig } from "../core/infrastructure/repository/config/address_config"
 import { DeliveryConfig } from "../core/infrastructure/repository/config/delivery_config"
 import dotenv from 'dotenv';
-if (process.env.NODE_ENV !== "production") {
-    import("dotenv").then(dotenv => dotenv.config());
-  }
+dotenv.config();
 console.log(`DATABASE_URL at runtime: '${process.env.DATABASE_URL}'`);
 
 
 const AppDataSource = new DataSource({
     type: "postgres",
     url: process.env.DATABASE_URL, //connection string for hosted DBs
-    //host: process.env.HOSTNAME || "localhost",
-   // port: parseInt(process.env.PGPORT || "5432", 10),
-    //username: process.env.USERNAME || "postgres",
-    //password:process.env.PASSWORD_DB,
-    //database: process.env.DATABASE,
+     port: parseInt(process.env.PGPORT || "5432", 10),
+    username: process.env.USERNAME || "postgres",
+    password:process.env.PASSWORD_DB,
+    database: process.env.DATABASE,
     entities: [UserConfig,CategoriesConfig, ProductConfig, InventoryConfig,CartConfig,CartItemConfig,OrderConfig,OrderItemConfig,OrderPaymentConfig,AddressConfig,DeliveryConfig],
     synchronize: false,
     logging: false,
