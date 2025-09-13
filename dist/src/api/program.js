@@ -52,7 +52,7 @@ exports.shipBubbleConfig = {
     secretKey: process.env.SB_SECRET_KEY
 };
 exports.myBaseConfig = {
-    myBaseurl: "http://localhost:8000/webhook/shipbubble"
+    myBaseurl: `${process.env.MYBASEURL}/webhook/shipbubble`
 };
 exports.api = new apii_call_1.Api();
 exports.categoriesDb = new categories_db_1.CategoriesDB(connection_1.default);
