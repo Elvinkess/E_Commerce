@@ -16,13 +16,11 @@ dotenv.config();
 // const express = require('express')
 const app = express()
 
-const allowedOrigins = [
-    "http://localhost:3000",
-  ];
+
 
 app.use(express.json());
 app.use(cors({
-    origin:"https://ecommerce-frontend-blue-phi.vercel.app",// frontend URL
+    origin:'*',// frontend URL
     credentials: true,                // allow cookies
 }));
 app.use(cookieParser());
