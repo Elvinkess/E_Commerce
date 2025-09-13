@@ -17,13 +17,26 @@ const app = express()
 
 const allowedOrigins = [
     "http://localhost:3000",
+    "https://ecommerce-frontend-blue-phi.vercel.app",
   ];
 
+
 app.use(express.json());
-app.use(cors({
-    origin:"https://ecommerce-frontend-blue-phi.vercel.app",// frontend URL
-    credentials: true,                // allow cookies
-}));
+
+app.use(
+    cors({
+      origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, origin);
+        } else {
+          callback(new Error("Not allowed by CORS"));
+        }
+      },
+      credentials: true,
+    })
+  );
+
+
 app.use(cookieParser());
 
 
