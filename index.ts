@@ -20,7 +20,7 @@ const app = express()
 
 app.use(express.json());
 app.use(cors({
-    origin:'*',// frontend URL
+    origin:'https://ecommerce-frontend-blue-phi.vercel.app/',// frontend URL
     credentials: true,                // allow cookies
 }));
 app.use(cookieParser());
