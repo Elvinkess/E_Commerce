@@ -16,11 +16,11 @@ dotenv.config();
 const AppDataSource = new DataSource({
     type: "postgres",
     url: process.env.DATABASE_URL, //connection string for hosted DBs
-    host: process.env.HOSTNAME || "localhost",
-    port: parseInt(process.env.PGPORT || "5432", 10),
-    username: process.env.USERNAME || "postgres",
-    password:process.env.PASSWORD_DB,
-    database: process.env.DATABASE,
+    //host: process.env.HOSTNAME || "localhost",
+   // port: parseInt(process.env.PGPORT || "5432", 10),
+    //username: process.env.USERNAME || "postgres",
+    //password:process.env.PASSWORD_DB,
+    //database: process.env.DATABASE,
     entities: [UserConfig,CategoriesConfig, ProductConfig, InventoryConfig,CartConfig,CartItemConfig,OrderConfig,OrderItemConfig,OrderPaymentConfig,AddressConfig,DeliveryConfig],
     synchronize: false,
     logging: false,
