@@ -77,7 +77,7 @@ export let shipBubbleConfig:ShipBubbleConfig ={
 }
 
 export let myBaseConfig:myBaseUrlConfig ={
-  myBaseurl:"http://localhost:8000/webhook/shipbubble"
+  myBaseurl:`${process.env.MYBASEURL}/webhook/shipbubble`
 }
 
 export let api:IApi = new Api()
