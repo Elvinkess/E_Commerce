@@ -25,8 +25,8 @@ const AppDataSource = new DataSource({
     entities: [UserConfig,CategoriesConfig, ProductConfig, InventoryConfig,CartConfig,CartItemConfig,OrderConfig,OrderItemConfig,OrderPaymentConfig,AddressConfig,DeliveryConfig],
     synchronize: false,
     logging: false,
-    ssl: {
-        rejectUnauthorized: false, // Required for hosted DBs like Render or Supabase
+    extra: {
+        ssl: { rejectUnauthorized: false }, // required for Render Postgres
       }
 })
 

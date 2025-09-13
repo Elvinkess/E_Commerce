@@ -19,7 +19,7 @@ dotenv_1.default.config();
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use((0, cors_1.default)({
-    origin: "http://localhost:3000", // frontend URL
+    origin: '*', // frontend URL
     credentials: true, // allow cookies
 }));
 app.use((0, cookie_parser_1.default)());
