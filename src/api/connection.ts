@@ -24,7 +24,7 @@ const AppDataSource = new DataSource({
     // database: process.env.DATABASE,
     entities: [UserConfig,CategoriesConfig, ProductConfig, InventoryConfig,CartConfig,CartItemConfig,OrderConfig,OrderItemConfig,OrderPaymentConfig,AddressConfig,DeliveryConfig],
     synchronize: false,
-    logging: false,
+    logging: true,
     ssl: { rejectUnauthorized: false }, // required for Render Postgres
       
 })
