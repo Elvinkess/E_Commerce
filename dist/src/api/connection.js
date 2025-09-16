@@ -29,15 +29,15 @@ dotenv_1.default.config();
 console.log(`DATABASE_URL at runtime: '${process.env.DATABASE_URL}'`);
 const AppDataSource = new typeorm_1.DataSource({
     type: "postgres",
-    //url: process.env.DATABASE_URL_EX, //connection string for hosted DBs
-    port: parseInt(process.env.PGPORT || "5432", 10),
-    username: process.env.USERNAME_LOCAL || "postgres",
-    password: process.env.PASSWORD,
-    database: process.env.DATABASE_LOCAL,
+    url: process.env.DATABASE_URL_EX, //connection string for hosted DBs
+    //  port: parseInt(process.env.PGPORT || "5432", 10),
+    // username: process.env.USERNAME || "postgres",
+    // password:process.env.PASSWORD_DB,
+    // database: process.env.DATABASE,
     entities: [user_config_1.UserConfig, categories_config_1.CategoriesConfig, product_config_1.ProductConfig, inventory_config_1.InventoryConfig, cart_config_1.CartConfig, cart_item_configs_1.CartItemConfig, order_1.OrderConfig, order_item_config_1.OrderItemConfig, order_payment_config_1.OrderPaymentConfig, address_config_1.AddressConfig, delivery_config_1.DeliveryConfig],
     synchronize: false,
     logging: false,
-    //ssl: { rejectUnauthorized: false }, // required for Render Postgres
+    ssl: { rejectUnauthorized: false }, // required for Render Postgres
 });
 AppDataSource.initialize()
     .then(() => __awaiter(void 0, void 0, void 0, function* () {
