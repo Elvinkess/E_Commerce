@@ -12,7 +12,7 @@ import { AddressConfig } from "../core/infrastructure/repository/config/address_
 import { DeliveryConfig } from "../core/infrastructure/repository/config/delivery_config"
 import dotenv from 'dotenv';
 dotenv.config();
-console.log(`DATABASE_URL at runtime: '${process.env.DATABASE_URL}'`);
+console.log(`DATABASE_URL_EX at runtime: '${process.env.DATABASE_URL_EX}'`);
 
 
 const AppDataSource = new DataSource({
