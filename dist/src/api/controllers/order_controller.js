@@ -15,12 +15,17 @@ class OrderController {
         this.order = order;
         this.create = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             try {
-                let order = yield this.order.get(req.params.userId);
+                const userId = req.params.userId ? Number(req.params.userId) : null;
+                const guestId = req.query.guestId ? String(req.query.guestId) : null;
+                if (!userId && !guestId) {
+                    return res.status(400).json({ error: "Either userId or guestId is required" });
+                }
+                let order = yield this.order.get(userId, guestId);
                 console.log(order);
                 res.json(order);
             }
             catch (err) {
-                res.json({ error: err.message });
+                res.status(500).json({ error: err.message });
             }
         });
         this.getorderHistory = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
@@ -29,26 +34,40 @@ class OrderController {
                 res.json(order);
             }
             catch (err) {
-                res.json({ error: err.message });
+                res.status(500).json({ error: err.message });
             }
         });
         this.payment = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             try {
-                let payment = yield this.order.payForOrder(req.params.orderId);
+                const orderId = Number(req.params.orderId);
+                if (isNaN(orderId)) {
+                    return res.status(400).json({ error: "Invalid orderId" });
+                }
+                const email = req.body.email;
+                let payment = yield this.order.payForOrder(orderId, email);
                 console.log(payment);
                 res.status(200).json(payment);
             }
             catch (err) {
-                res.json({ error: err.message });
+                res.status(500).json({ error: err.message });
             }
         });
         this.removeOrder = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             try {
-                let removeOrder = yield this.order.remove(req.params.orderId, req.params.userId);
+                const orderId = Number(req.params.orderId);
+                if (isNaN(orderId)) {
+                    return res.status(400).json({ error: "Invalid orderId" });
+                }
+                const userId = req.query.userId ? Number(req.query.userId) : null;
+                const guestId = req.query.guestId ? String(req.query.guestId) : null;
+                if (!userId && !guestId) {
+                    return res.status(400).json({ error: "Either userId or guestId is required" });
+                }
+                let removeOrder = yield this.order.remove(orderId, userId, guestId);
                 res.status(200).json(removeOrder);
             }
             catch (err) {
-                res.json({ error: err.message });
+                res.status(500).json({ error: err.message });
             }
         });
         this.confirmPayment = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
@@ -58,7 +77,7 @@ class OrderController {
                 res.status(200).json(confirmPayment);
             }
             catch (err) {
-                res.json({ error: err.message });
+                res.status(500).json({ error: err.message });
             }
         });
     }

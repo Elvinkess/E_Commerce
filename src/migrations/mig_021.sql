@@ -1,0 +1,7 @@
+
+ALTER TABLE cart
+ALTER COLUMN user_id DROP NOT NULL;
+
+
+ALTER TABLE cart
+ADD COLUMN guest_id VARCHAR(255);

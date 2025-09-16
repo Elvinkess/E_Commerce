@@ -21,11 +21,14 @@ export class AddressLogic implements IAddressLogic{
             name:address.name,
             email:address.email,
             phone:address.phone,
-            address:address.address
+            address:address.address,
         }
-        let user = await this.userDB.getOne({id:address.user_id})
 
-        if(!user){throw new Error("User doesn't exist")}
+        const user = address.user_id ? await this.userDB.getOne({ id: address.user_id }) : null;
+
+        if (!user && !address.guest_id) {
+          throw new Error("Address must be associated with either a valid user or a guest");
+        }
 
         let validateAddress = await this.deliveryService.validateAddress(validateReq)
         
@@ -34,7 +37,7 @@ export class AddressLogic implements IAddressLogic{
 
            
         }else{
-            let saveAddress= new Address(address.name,address.email,address.phone,validateAddress.data.address_code,user.id,address.address)
+            let saveAddress= new Address(address.name,address.email,address.phone,validateAddress.data.address_code,address.user_id,address.guest_id,address.address)
             
             return await this.addressDB.save(saveAddress)
         }

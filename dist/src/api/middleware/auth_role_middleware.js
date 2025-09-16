@@ -33,7 +33,6 @@ class AuthMiddleware {
         this.authenticateJWT = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             var _a;
             const token = (_a = req.cookies) === null || _a === void 0 ? void 0 : _a.token;
-            console.log(token, "--token---");
             if (!token) {
                 return res.status(401).json({ message: "Access token is missing" });
             }
@@ -53,8 +52,6 @@ class AuthMiddleware {
             var _a;
             console.log(req.user);
             if (!req.user || !roles.includes((_a = req === null || req === void 0 ? void 0 : req.user) === null || _a === void 0 ? void 0 : _a.role)) {
-                //onsole.log("Full user object from request:", req.user);
-                //console.log("User role from request:", req.user?.role as UserRole);
                 console.log("Allowed roles:", roles);
                 res.status(403).json({ message: "Forbidden: You don't have the required role" });
                 return;

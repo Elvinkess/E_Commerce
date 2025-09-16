@@ -4,22 +4,24 @@ import { ICartCache } from "../../usecase/interface/data_access/cart_cache_db";
 
 
 export class RedisCartCache implements ICartCache {
-    private key(userId: number): string {
-      return `cart:response:user:${userId}`;
+    private key(userId: number | null,guestId:string | null): string {
+      if(userId !== null)  return `cart:response:user:${userId}`;
+      if(guestId !== null) return `cart:response:guest:${guestId}`;
+      throw new Error("Either userId or guestId must be provided");
     }
   
-    getCartResponse = async(userId: number): Promise<CartResponse | null> =>{
-      const data = await redisClient.get(this.key(userId));
+    getCartResponse = async(userId: number|null,guestId:string|null): Promise<CartResponse | null> =>{
+      const data = await redisClient.get(this.key(userId,guestId));
       return data ? JSON.parse(data) : null;
     }
   
-    setCartResponse = async(userId: number, response: CartResponse): Promise<void> =>{
-      await redisClient.set(this.key(userId), JSON.stringify(response), {
+    setCartResponse = async(response: CartResponse,userId: number|null,guestId:string|null): Promise<void> =>{
+      await redisClient.set(this.key(userId,guestId), JSON.stringify(response), {
         EX: 60 * 60 * 24, // expire after 24 hours
       });
     }
   
-    clearCart = async(userId: number): Promise<void> =>{
-      await redisClient.del(this.key(userId));
+    clearCart = async(userId: number |null,guestId:string | null): Promise<void> =>{
+      await redisClient.del(this.key(userId,guestId));
     }
   }

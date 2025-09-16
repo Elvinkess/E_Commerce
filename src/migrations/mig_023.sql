@@ -1,0 +1,7 @@
+
+ALTER TABLE address
+ALTER COLUMN user_id DROP NOT NULL;
+
+
+ALTER TABLE address
+ADD COLUMN guest_id VARCHAR(255);

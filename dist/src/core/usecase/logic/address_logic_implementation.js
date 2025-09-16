@@ -28,18 +28,18 @@ class AddressLogic {
                 name: address.name,
                 email: address.email,
                 phone: address.phone,
-                address: address.address
+                address: address.address,
             };
-            let user = yield this.userDB.getOne({ id: address.user_id });
-            if (!user) {
-                throw new Error("User doesn't exist");
+            const user = address.user_id ? yield this.userDB.getOne({ id: address.user_id }) : null;
+            if (!user && !address.guest_id) {
+                throw new Error("Address must be associated with either a valid user or a guest");
             }
             let validateAddress = yield this.deliveryService.validateAddress(validateReq);
             if (!validateAddress.data.address_code) {
                 throw new Error("Please use a valid address");
             }
             else {
-                let saveAddress = new address_1.Address(address.name, address.email, address.phone, validateAddress.data.address_code, user.id, address.address);
+                let saveAddress = new address_1.Address(address.name, address.email, address.phone, validateAddress.data.address_code, address.user_id, address.guest_id, address.address);
                 return yield this.addressDB.save(saveAddress);
             }
         });

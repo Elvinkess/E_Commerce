@@ -11,17 +11,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Paymentlogic = void 0;
 class Paymentlogic {
-    constructor(orderDB, userDB, orderPaymentDB, paymentService, deliveryDB, cardDB, inventoryDB, orderItemDB, productDB, deliveryLogic) {
-        this.orderDB = orderDB;
-        this.userDB = userDB;
+    constructor(orderPaymentDB, paymentService) {
         this.orderPaymentDB = orderPaymentDB;
         this.paymentService = paymentService;
-        this.deliveryDB = deliveryDB;
-        this.cardDB = cardDB;
-        this.inventoryDB = inventoryDB;
-        this.orderItemDB = orderItemDB;
-        this.productDB = productDB;
-        this.deliveryLogic = deliveryLogic;
         this.initiatePayforOrder = (payment) => __awaiter(this, void 0, void 0, function* () {
             var _a;
             let savedPaymentOrder = (_a = yield this.orderPaymentDB.getOne({ id: payment.id })) !== null && _a !== void 0 ? _a : yield this.orderPaymentDB.save(payment);

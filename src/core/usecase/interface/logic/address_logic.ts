@@ -5,7 +5,8 @@ export interface AddressRequest{
     email:string
     phone:string
     address:string
-    user_id:number
+    user_id:number | null
+    guest_id:string | null
 }
 
 export interface IAddressLogic{

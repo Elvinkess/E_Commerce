@@ -1,7 +1,7 @@
 import { CartResponse } from "../../../domain/dto/responses/product_cart_response";
 
 export interface ICartCache {
-    getCartResponse(userId: number): Promise<CartResponse | null>;
-    setCartResponse(userId: number, response: CartResponse): Promise<void>;
-    clearCart(userId: number): Promise<void>;
+    getCartResponse(userId: number | null,guestId:string | null): Promise<CartResponse | null>;
+    setCartResponse(response: CartResponse,userId: number|null,guestId:string|null ): Promise<void>;
+    clearCart(userId: number|null,guestId:string|null): Promise<void>;
   }

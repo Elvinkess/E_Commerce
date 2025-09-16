@@ -35,9 +35,13 @@ __decorate([
     __metadata("design:type", Number)
 ], AddressConfig.prototype, "address_code", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", Number)
+    (0, typeorm_1.Column)({ type: "int", nullable: true }),
+    __metadata("design:type", Object)
 ], AddressConfig.prototype, "user_id", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", length: 255, nullable: true }),
+    __metadata("design:type", Object)
+], AddressConfig.prototype, "guest_id", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)

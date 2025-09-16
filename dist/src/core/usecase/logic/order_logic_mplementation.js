@@ -53,16 +53,20 @@ class OrderLogic {
             }
             return orderResponses.reverse();
         });
-        this.get = (userId) => __awaiter(this, void 0, void 0, function* () {
+        this.get = (userId, guestId) => __awaiter(this, void 0, void 0, function* () {
             var _a, _b, _c;
+            if (!userId && !guestId) {
+                throw new Error("Either of userId or guestId must be available");
+            }
             let totalAmount = 0;
             let orderedItems = [];
-            let cart = yield this.cartLogic.get(userId);
-            // Get or create pending order
-            let existingOrder = yield this.orderDB.getOne({ user_id: userId, status: order_items_1.OrderStatus.PENDING });
-            let savedOrder = existingOrder !== null && existingOrder !== void 0 ? existingOrder : yield this.orderDB.save(new order_1.Order(userId, totalAmount, order_items_1.OrderStatus.PENDING));
+            let cart = yield this.cartLogic.get(userId, guestId);
+            // Get existing order
+            const existingOrder = userId ? yield this.orderDB.getOne({ user_id: userId, status: order_items_1.OrderStatus.PENDING }) : yield this.orderDB.getOne({ guest_id: guestId, status: order_items_1.OrderStatus.PENDING });
+            //create new order if either of useId or guestId is available
+            const savedOrder = existingOrder !== null && existingOrder !== void 0 ? existingOrder : yield this.orderDB.save(new order_1.Order(userId, guestId, totalAmount, order_items_1.OrderStatus.PENDING));
             // Get existing order items
-            let existingOrderItems = yield this.orderItemDB.get({ order_id: savedOrder.id });
+            const existingOrderItems = yield this.orderItemDB.get({ order_id: savedOrder.id });
             // Map existing items by product id for quick lookup
             const existingItemsMap = new Map();
             for (let item of existingOrderItems) {
@@ -107,23 +111,38 @@ class OrderLogic {
             orderResponse.total_price = totalAmount;
             return orderResponse;
         });
-        this.remove = (orderId, userId) => __awaiter(this, void 0, void 0, function* () {
-            let user = yield this.userDB.get({ id: userId });
-            if (!user.length)
-                throw new Error("User does not exist");
-            let order = yield this.orderDB.getOne({ id: orderId, user_id: userId });
-            if (!order)
-                throw new Error("Order does not exist or does not belong to user");
+        this.remove = (orderId, userId, guestId) => __awaiter(this, void 0, void 0, function* () {
+            // validate userId and guestId
+            if (!userId && !guestId) {
+                throw new Error("Either userId or guestId must be available");
+            }
+            let order;
+            if (userId) {
+                // check user exists
+                const user = yield this.userDB.getOne({ id: userId });
+                if (!user)
+                    throw new Error("User does not exist");
+                // fetch order belonging to user
+                order = yield this.orderDB.getOne({ id: orderId, user_id: userId });
+            }
+            else if (guestId) {
+                // fetch order belonging to guest
+                order = yield this.orderDB.getOne({ id: orderId, guest_id: guestId });
+            }
+            if (!order) {
+                throw new Error("Order does not exist or does not belong to this account");
+            }
             if (order.status !== order_items_1.OrderStatus.PENDING) {
                 throw new Error("Only pending orders can be removed");
             }
+            // remove associated records
             yield this.orderItemDB.removeMany({ order_id: orderId });
             yield this.orderPaymentDB.removeMany({ orderId: orderId });
             yield this.deliveryDB.removeMany({ orderid: orderId });
             yield this.orderDB.remove({ id: orderId });
             return "Order successfully removed";
         });
-        this.payForOrder = (orderId) => __awaiter(this, void 0, void 0, function* () {
+        this.payForOrder = (orderId, guestEmail) => __awaiter(this, void 0, void 0, function* () {
             var _a;
             let order = yield this.orderDB.getOne({ id: orderId });
             if (!order) {
@@ -132,24 +151,27 @@ class OrderLogic {
             if (order.status === order_items_1.OrderStatus.PAID) {
                 throw new Error("User already paid");
             }
-            let user = yield this.userDB.getOne({ id: order === null || order === void 0 ? void 0 : order.user_id });
+            let user = order.user_id ? yield this.userDB.getOne({ id: order.user_id }) : null;
+            // Validate that either user exists OR guestId+guestEmail is provided
             if (!user) {
-                throw new Error("USER  not found!!");
+                if (!order.guest_id || !guestEmail) {
+                    throw new Error("Order must belong to a registered user or have a valid guest with email");
+                }
             }
-            ;
             let date = new Date();
             let transactionReference = random_utility_1.RandomUtility.generateRandomString(15);
             let deliveryDate = (yield this.deliveryLogic.getDeliveryDate(order));
             let deliveryreq = {
                 orderId: order.id,
                 pickUpDate: deliveryDate,
-                deliveryInstructions: "Please deliiver on time",
-                orderDetails: yield this.get(user.id)
+                deliveryInstructions: "Please deliver on time",
+                orderDetails: yield this.get(order.user_id, order.guest_id)
             };
             //Creating Shippment
             let shipment = yield this.deliveryLogic.getDeliveryFee(deliveryreq);
             let deliveryFee = Math.round(parseFloat(`${shipment.data.fastest_courier.total + (shipment.data.fastest_courier.total * 0.2)}`));
-            let payment = new order_payment_1.OrderPayment({ amount: order.total_price, status: payment_status_enums_1.paymentStatus.PENDING, orderId: order.id, userEmail: user.email, date: date, transactionReference: transactionReference, deliveryamount: deliveryFee });
+            const Email = user ? user.email : guestEmail;
+            let payment = new order_payment_1.OrderPayment({ amount: order.total_price, status: payment_status_enums_1.paymentStatus.PENDING, orderId: order.id, userEmail: Email, date: date, transactionReference: transactionReference, deliveryamount: deliveryFee });
             let savedOrderpayment = (_a = yield this.orderPaymentDB.getOne({ transactionReference: transactionReference })) !== null && _a !== void 0 ? _a : yield this.orderPaymentDB.save(payment);
             let Orderpayment = yield this.paymentLogic.initiatePayforOrder(savedOrderpayment);
             return Orderpayment;
@@ -174,16 +196,11 @@ class OrderLogic {
                 throw new Error("User already paid");
             }
             let deliveryDate = yield this.deliveryLogic.getDeliveryDate(order);
-            let user = yield this.userDB.getOne({ id: order === null || order === void 0 ? void 0 : order.user_id });
-            if (!user) {
-                throw new Error("USER  not found!!");
-            }
-            ;
             let deliveryreq = {
                 orderId: order.id,
                 pickUpDate: deliveryDate,
                 deliveryInstructions: "Please deliiver on time",
-                orderDetails: yield this.get(user.id)
+                orderDetails: yield this.get(order.user_id, order.guest_id)
             };
             let shipment = yield this.deliveryLogic.createDelivery(deliveryreq);
             // INVENTORY UPDATE DATA
@@ -195,8 +212,16 @@ class OrderLogic {
                 let qSold = ((_b = inventory === null || inventory === void 0 ? void 0 : inventory.quantity_sold) !== null && _b !== void 0 ? _b : 0) + orderedItems[i].quantity;
                 yield this.inventoryDB.update({ id: product === null || product === void 0 ? void 0 : product.inventory_id }, { quantity_available: qAvailable, quantity_sold: qSold });
             }
-            yield this.cartCache.clearCart(order.user_id);
-            yield this.cartDB.update({ user_id: order === null || order === void 0 ? void 0 : order.user_id, user_status: cart_status_enum_1.cart_status.ACTIVE }, { user_status: cart_status_enum_1.cart_status.INACTIVE });
+            yield this.cartCache.clearCart(order.user_id, order.guest_id);
+            const where = { user_status: cart_status_enum_1.cart_status.ACTIVE };
+            if (order.user_id) {
+                where.user_id = order.user_id;
+            }
+            if (order.guest_id) {
+                where.guest_id = order.guest_id;
+            }
+            console.log("Updating cart with filter:", where);
+            yield this.cartDB.update(where, { user_status: cart_status_enum_1.cart_status.INACTIVE });
             yield this.orderDB.update({ id: order === null || order === void 0 ? void 0 : order.id }, { status: order_items_1.OrderStatus.PAID });
             yield this.deliveryDB.update({ orderid: order === null || order === void 0 ? void 0 : order.id }, { status: delivery_1.delivery_status.PAID });
             return updatedOrderPayment;

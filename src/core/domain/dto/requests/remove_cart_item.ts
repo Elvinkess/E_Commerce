@@ -1,4 +1,5 @@
 export interface RemoveCartItem{
-    userId: number
+    userId: number | null
+    guestId:string|null
     productId: number
 }

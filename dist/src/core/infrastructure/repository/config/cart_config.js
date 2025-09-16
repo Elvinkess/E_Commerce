@@ -20,9 +20,13 @@ __decorate([
     __metadata("design:type", Number)
 ], CartConfig.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", Number)
+    (0, typeorm_1.Column)({ type: "int", nullable: true }),
+    __metadata("design:type", Object)
 ], CartConfig.prototype, "user_id", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", length: 255, nullable: true }),
+    __metadata("design:type", Object)
+], CartConfig.prototype, "guest_id", void 0);
 __decorate([
     (0, typeorm_1.Column)("int", { array: true }),
     __metadata("design:type", Array)

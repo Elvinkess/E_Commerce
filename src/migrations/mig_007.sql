@@ -1,1 +1,1 @@
-CREATE TYPE order_status AS ENUM ('pending', 'shipped', 'delivered', 'cancelled','active','inactive');
+CREATE TYPE order_status AS ENUM ('pending','paid' 'shipped', 'delivered', 'cancelled','active','inactive');

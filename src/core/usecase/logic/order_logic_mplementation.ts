@@ -68,18 +68,22 @@ export class OrderLogic implements IOrderLogic{
 
 
 
-    get = async (userId: number): Promise<OrderResponse> => {
+    get = async (userId: number|null,guestId:string|null): Promise<OrderResponse> => {
+      if(!userId && !guestId){throw new Error("Either of userId or guestId must be available")}
+
       let totalAmount = 0;
       let orderedItems: OrderItemResponse[] = [];
     
-      let cart = await this.cartLogic.get(userId);
+      let cart =  await this.cartLogic.get(userId,guestId) 
     
-      // Get or create pending order
-      let existingOrder = await this.orderDB.getOne({user_id: userId, status: OrderStatus.PENDING});
-      let savedOrder = existingOrder ?? await this.orderDB.save(new Order(userId, totalAmount, OrderStatus.PENDING));
+      // Get existing order
+      const existingOrder = userId ? await this.orderDB.getOne({user_id: userId, status: OrderStatus.PENDING}) :await this.orderDB.getOne({guest_id:guestId, status: OrderStatus.PENDING})
+
+      //create new order if either of useId or guestId is available
+      const savedOrder = existingOrder ?? await this.orderDB.save(new Order(userId,guestId,totalAmount,OrderStatus.PENDING)) 
     
       // Get existing order items
-      let existingOrderItems = await this.orderItemDB.get({order_id: savedOrder.id});
+      const existingOrderItems = await this.orderItemDB.get({order_id: savedOrder.id});
     
       // Map existing items by product id for quick lookup
       const existingItemsMap = new Map<number, OrderItemResponse>();
@@ -136,57 +140,78 @@ export class OrderLogic implements IOrderLogic{
     }
     
 
-    remove = async (orderId: number, userId: number): Promise<string> => {
+    remove = async (orderId: number, userId: number | null, guestId: string | null): Promise<string> => {
+      // validate userId and guestId
+      if (!userId && !guestId) {
+        throw new Error("Either userId or guestId must be available");
+      }
+      let order;
 
-      let user = await this.userDB.get({ id: userId });
-      if (!user.length) throw new Error("User does not exist");
+      if (userId) {
+        // check user exists
+        const user = await this.userDB.getOne({ id: userId });
+        if (!user) throw new Error("User does not exist");
     
-      let order = await this.orderDB.getOne({ id: orderId, user_id: userId });
-      if (!order) throw new Error("Order does not exist or does not belong to user");
+        // fetch order belonging to user
+        order = await this.orderDB.getOne({ id: orderId, user_id: userId });
+      } else if (guestId) {
+        // fetch order belonging to guest
+        order = await this.orderDB.getOne({ id: orderId, guest_id: guestId });
+      }
+    
+      if (!order) {
+        throw new Error("Order does not exist or does not belong to this account");
+      }
     
       if (order.status !== OrderStatus.PENDING) {
         throw new Error("Only pending orders can be removed");
       }
     
+      // remove associated records
       await this.orderItemDB.removeMany({ order_id: orderId });
-    
       await this.orderPaymentDB.removeMany({ orderId: orderId });
-    
       await this.deliveryDB.removeMany({ orderid: orderId });
-    
       await this.orderDB.remove({ id: orderId });
     
       return "Order successfully removed";
     };
     
+    
  
     
 
-    payForOrder = async(orderId:number):Promise<CreateOrderPaymentresponse> =>{
-
+    payForOrder = async(orderId:number,guestEmail?:string):Promise<CreateOrderPaymentresponse> =>{
         let order = await this.orderDB.getOne({id:orderId})
         if(!order){throw new Error("ORDER not found!!");}
         if(order.status === OrderStatus.PAID){throw new Error("User already paid")}
 
-        let user = await this.userDB.getOne({id:order?.user_id})
-        if(!user){ throw new Error("USER  not found!!")};
+        let user = order.user_id ? await this.userDB.getOne({ id: order.user_id }) : null;
+
+       // Validate that either user exists OR guestId+guestEmail is provided
+        if (!user) {
+         if (!order.guest_id || !guestEmail) {
+            throw new Error("Order must belong to a registered user or have a valid guest with email");
+         }
+       }
+
+     
         let date = new Date()
         let transactionReference  = RandomUtility.generateRandomString(15)
         let deliveryDate = (await this.deliveryLogic.getDeliveryDate(order))
 
         let deliveryreq:CreateDeliveryRequest = {
-            orderId:order.id,
-            pickUpDate:deliveryDate,
-             deliveryInstructions:"Please deliiver on time",
-             orderDetails: await this.get(user.id)
+          orderId:order.id,
+          pickUpDate:deliveryDate,
+          deliveryInstructions:"Please deliver on time",
+          orderDetails: await this.get(order.user_id,order.guest_id)
         }
 
         //Creating Shippment
        let shipment = await this.deliveryLogic.getDeliveryFee(deliveryreq)
        
        let deliveryFee = Math.round(parseFloat(`${shipment.data.fastest_courier.total + (shipment.data.fastest_courier.total * 0.2)}`)); 
-       
-        let payment = new OrderPayment({amount:order.total_price ,status:paymentStatus.PENDING,orderId:order.id,userEmail:user.email,date:date,transactionReference:transactionReference,deliveryamount:deliveryFee})
+        const Email= user ? user.email : guestEmail!
+        let payment = new OrderPayment({amount:order.total_price ,status:paymentStatus.PENDING,orderId:order.id,userEmail:Email,date:date,transactionReference:transactionReference,deliveryamount:deliveryFee})
         let savedOrderpayment = await this.orderPaymentDB.getOne({transactionReference:transactionReference}) ?? await this.orderPaymentDB.save(payment)
         let Orderpayment = await this.paymentLogic.initiatePayforOrder(savedOrderpayment)
         return Orderpayment
@@ -200,6 +225,7 @@ export class OrderLogic implements IOrderLogic{
         let payment = await this.orderPaymentDB.getOne({transactionReference:transactionRef});
         if(payment === null){throw new Error("There is no initiated payment for this order")}
         let order = await this.orderDB.getOne({id:payment?.orderId});
+        
 
         if(payment?.status == paymentStatus.PAID ){  throw Error(`This payment with transactionRef: ${transactionRef} has been paid and completed`)}
         let totalAmount = payment.amount + payment.deliveryamount
@@ -212,14 +238,13 @@ export class OrderLogic implements IOrderLogic{
         if(!order){throw new Error("ORDER not found!!");}
         if(order.status === OrderStatus.PAID){throw new Error("User already paid")}
         let deliveryDate = await this.deliveryLogic.getDeliveryDate(order)
-        let user = await this.userDB.getOne({id:order?.user_id})
-        if(!user){ throw new Error("USER  not found!!")};
+      
 
         let deliveryreq:CreateDeliveryRequest ={
           orderId:order.id,
           pickUpDate:deliveryDate,
             deliveryInstructions:"Please deliiver on time",
-            orderDetails: await this.get(user.id)
+            orderDetails: await this.get(order.user_id,order.guest_id)
           }
         let shipment =await this.deliveryLogic.createDelivery(deliveryreq)
 
@@ -242,11 +267,20 @@ export class OrderLogic implements IOrderLogic{
          );
         }
         
-        await this.cartCache.clearCart(order.user_id);
-        await this.cartDB.update(
-          { user_id: order?.user_id, user_status: cart_status.ACTIVE },
-          { user_status: cart_status.INACTIVE }
-        );
+        await this.cartCache.clearCart(order.user_id,order.guest_id);
+       
+        const where: any = { user_status: cart_status.ACTIVE };
+
+        if (order.user_id) {
+          where.user_id = order.user_id;
+        }
+
+        if (order.guest_id) {
+          where.guest_id = order.guest_id;
+        }
+        console.log("Updating cart with filter:", where);
+        await this.cartDB.update(where, { user_status: cart_status.INACTIVE });
+
         await this.orderDB.update({ id: order?.id }, { status: OrderStatus.PAID });
         await this.deliveryDB.update({ orderid: order?.id }, { status: delivery_status.PAID });
         

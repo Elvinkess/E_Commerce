@@ -109,7 +109,7 @@ export let cartLogic:ICartLogic = new CartLogic(cartDb,userDb,cartitemDb,product
 export let deliveryService:IDeliveryService = new DeliveryService(api,shipBubbleConfig,myBaseConfig)
 export let  addressLogic:IAddressLogic = new AddressLogic(addressDb,deliveryService,userDb)
 export let deliveryLogic:IDeliveryLogic = new DeliveryLogic(deliveryService,userDb,addressDb,deliverytDb,productDb);
-export let paymentLogic:IPaymentLogic = new Paymentlogic(orderDb,userDb,orderPaymentDb,paymentService,deliverytDb,cartDb,inventoryDb,orderItemDb,productDb,deliveryLogic)
+export let paymentLogic:IPaymentLogic = new Paymentlogic(orderPaymentDb,paymentService)
 export let orderLogic:IOrderLogic = new OrderLogic(orderDb,orderItemDb,cartDb,productDb,userDb,cartLogic,inventoryDb,deliveryLogic,paymentLogic,orderPaymentDb,deliverytDb,cache);
 
 

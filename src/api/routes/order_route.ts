@@ -4,11 +4,11 @@ import { orderLogic} from "../program";
 
 const orderRoute = Router();
 let orderController = new OrderController(orderLogic)
-orderRoute.get("/order/:userId", orderController.create);
+orderRoute.post("/:userId?", orderController.create);
 orderRoute.get("/history/:userId", orderController.getorderHistory);
-orderRoute.get("/payment/:orderId", orderController.payment);
+orderRoute.post("/pay/:orderId/payment", orderController.payment);
 orderRoute.get("/confirmpayment", orderController.confirmPayment);
-orderRoute.delete("/remove/:orderId/user/:userId",orderController.removeOrder);
+orderRoute.delete("/remove/:orderId", orderController.removeOrder);
   
 
 export default orderRoute

@@ -6,10 +6,22 @@ import { Categories } from "../../core/domain/entity/categories";
 
  
 
- interface AuthRequest extends Request {
-  user?: {email: string; username: string; role: UserRole; id: number} ;
+//  export interface AuthRequest extends Request {
+//   user?: {email: string; username: string; role: UserRole; id: number} ;
+// }
+export interface AuthRequest<
+  P = {},  // params
+  ResBody = any,
+  ReqBody = any,
+  ReqQuery = {}
+> extends Request<P, ResBody, ReqBody, ReqQuery> {
+  user?: {
+    email: string;
+    username: string;
+    role: UserRole;
+    id: number;
+  };
 }
-
 
 export  function authorizeRole  (roles: UserRole[]){
     return (req: AuthRequest, res: Response, next: NextFunction):void => {
@@ -36,10 +48,6 @@ export  function authorizeRole  (roles: UserRole[]){
         
         console.log(req.user)
         if (!req.user || !roles.includes(req?.user?.role  )) {
-  
-           //onsole.log("Full user object from request:", req.user);
-          //console.log("User role from request:", req.user?.role as UserRole);
-          
           console.log("Allowed roles:", roles);
            res.status(403).json({ message: "Forbidden: You don't have the required role" });
            return
@@ -49,7 +57,6 @@ export  function authorizeRole  (roles: UserRole[]){
     }
      authenticateJWT = async (req: AuthRequest, res: Response, next: NextFunction) :Promise<any> => {
       const token = req.cookies?.token;
-      console.log(token,"--token---")
     
       if (!token) {
         return res.status(401).json({ message: "Access token is missing" });

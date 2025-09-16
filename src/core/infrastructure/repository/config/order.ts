@@ -8,8 +8,11 @@ import { OrderStatus } from "../../../domain/enums/order_items"
     @PrimaryGeneratedColumn()
     id!: number
 
-    @Column()
-    user_id!:number
+    @Column({ type: "int", nullable: true })
+    user_id!: number | null
+
+    @Column({ type: "varchar", length: 255, nullable: true })
+    guest_id!: string | null
 
     @Column()
     total_price!:number
@@ -21,3 +24,5 @@ import { OrderStatus } from "../../../domain/enums/order_items"
     created_at!:number
   
 }
+
+

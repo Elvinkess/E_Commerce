@@ -5,9 +5,10 @@ import { CartResponse } from "../../../domain/dto/responses/product_cart_respons
 import { Cart } from "../../../domain/entity/cart";
 
 export interface ICartLogic{
-get(userId:number):Promise< CartResponse | null>
-delete(userId:number):Promise<Cart>
+get(userId:number | null,guestId:string | null):Promise< CartResponse | null>
+delete(userId:number|null,guestId:string |null):Promise<Cart>
 addItemToCart  (req: addItemCartRequest): Promise<CartResponse >
 removeItemFromCart (req:RemoveCartItem): Promise<CartResponse> 
 updateCartItem(req:UpdateCartItem):Promise<CartResponse>
+mergeCart(userId:number | null,guestId:string | null):Promise<CartResponse|null>
 }

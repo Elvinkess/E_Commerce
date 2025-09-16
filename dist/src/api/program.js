@@ -75,6 +75,6 @@ exports.cartLogic = new cart_logic_1.CartLogic(exports.cartDb, exports.userDb, e
 exports.deliveryService = new delivery_service_1.DeliveryService(exports.api, exports.shipBubbleConfig, exports.myBaseConfig);
 exports.addressLogic = new address_logic_implementation_1.AddressLogic(exports.addressDb, exports.deliveryService, exports.userDb);
 exports.deliveryLogic = new delivery_logic_1.DeliveryLogic(exports.deliveryService, exports.userDb, exports.addressDb, exports.deliverytDb, exports.productDb);
-exports.paymentLogic = new payment_logic_implementation_1.Paymentlogic(exports.orderDb, exports.userDb, exports.orderPaymentDb, exports.paymentService, exports.deliverytDb, exports.cartDb, exports.inventoryDb, exports.orderItemDb, exports.productDb, exports.deliveryLogic);
+exports.paymentLogic = new payment_logic_implementation_1.Paymentlogic(exports.orderPaymentDb, exports.paymentService);
 exports.orderLogic = new order_logic_mplementation_1.OrderLogic(exports.orderDb, exports.orderItemDb, exports.cartDb, exports.productDb, exports.userDb, exports.cartLogic, exports.inventoryDb, exports.deliveryLogic, exports.paymentLogic, exports.orderPaymentDb, exports.deliverytDb, cache);
 exports.authmiddleware = new auth_role_middleware_1.AuthMiddleware(exports.userLogic);

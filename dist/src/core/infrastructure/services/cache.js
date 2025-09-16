@@ -16,21 +16,25 @@ exports.RedisCartCache = void 0;
 const connection_1 = __importDefault(require("../../../api/redis/connection"));
 class RedisCartCache {
     constructor() {
-        this.getCartResponse = (userId) => __awaiter(this, void 0, void 0, function* () {
-            const data = yield connection_1.default.get(this.key(userId));
+        this.getCartResponse = (userId, guestId) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield connection_1.default.get(this.key(userId, guestId));
             return data ? JSON.parse(data) : null;
         });
-        this.setCartResponse = (userId, response) => __awaiter(this, void 0, void 0, function* () {
-            yield connection_1.default.set(this.key(userId), JSON.stringify(response), {
+        this.setCartResponse = (response, userId, guestId) => __awaiter(this, void 0, void 0, function* () {
+            yield connection_1.default.set(this.key(userId, guestId), JSON.stringify(response), {
                 EX: 60 * 60 * 24, // expire after 24 hours
             });
         });
-        this.clearCart = (userId) => __awaiter(this, void 0, void 0, function* () {
-            yield connection_1.default.del(this.key(userId));
+        this.clearCart = (userId, guestId) => __awaiter(this, void 0, void 0, function* () {
+            yield connection_1.default.del(this.key(userId, guestId));
         });
     }
-    key(userId) {
-        return `cart:response:user:${userId}`;
+    key(userId, guestId) {
+        if (userId !== null)
+            return `cart:response:user:${userId}`;
+        if (guestId !== null)
+            return `cart:response:guest:${guestId}`;
+        throw new Error("Either userId or guestId must be provided");
     }
 }
 exports.RedisCartCache = RedisCartCache;
