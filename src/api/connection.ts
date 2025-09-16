@@ -17,15 +17,17 @@ console.log(`DATABASE_URL at runtime: '${process.env.DATABASE_URL}'`);
 
 const AppDataSource = new DataSource({
     type: "postgres",
-    url: process.env.DATABASE_URL, //connection string for hosted DBs
+    url: process.env.DATABASE_URL_EX, //connection string for hosted DBs
     //  port: parseInt(process.env.PGPORT || "5432", 10),
     // username: process.env.USERNAME || "postgres",
     // password:process.env.PASSWORD_DB,
     // database: process.env.DATABASE,
     entities: [UserConfig,CategoriesConfig, ProductConfig, InventoryConfig,CartConfig,CartItemConfig,OrderConfig,OrderItemConfig,OrderPaymentConfig,AddressConfig,DeliveryConfig],
     synchronize: false,
-    logging: true,
-    ssl: { rejectUnauthorized: false }, // required for Render Postgres
+    logging: false,
+    extra: {
+        ssl: { rejectUnauthorized: false }, // required for Render Postgres
+    }
       
 })
 
