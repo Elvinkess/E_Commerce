@@ -135,14 +135,18 @@ NodeCommerce is a modern backend for an online store, built using **Node.js**, *
 
 ## 🔗 Live Demo
 
-Visit:
-👉 [https://e-commerce-as1q.onrender.com/product](https://e-commerce-as1q.onrender.com/product)
+Visit the demo:
+https://ecommerce-frontend-blue-phi.vercel.app/
 
-⚠️ **Note**: The Render PostgreSQL instance may go inactive if unused. You may need to:
+Important Notes:
 
-* Recreate a new DB instance on Render
-* Or connect your own PostgreSQL DB
+The mobile version of the site is currently unavailable.
 
+The Render PostgreSQL instance may become inactive or expire, which could cause temporary access issues. To resolve this, you may:
+
+Create a new database instance on Render, or
+
+Connect to your own PostgreSQL database.
 ---
 
 ## 🛠️ Installation
