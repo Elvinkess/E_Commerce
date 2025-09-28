@@ -20,24 +20,6 @@ export default class BaseController {
                 uploadFiles = files.map(file => new UploadFile("",  file.path))
             } else {
 
-                /**
-                 * Example of how files may  look like
-                 * {
-                        image: [
-                            {
-                            fieldname: 'image',
-                            originalname: 'download-small.jpeg',
-                            encoding: '7bit',
-                            mimetype: 'image/jpeg',
-                            destination: 'uploads/',
-                            filename: 'image-1734789174485-137801869.jpeg',
-                            path: 'uploads/image-1734789174485-137801869.jpeg',
-                            size: 9804
-                            }
-                        ]
-                        }
-                 * 
-                 */
                 uploadFiles = files?.[fieldName]?.map(file => new UploadFile("",  file.path)) ?? []
             }
             return uploadFiles;

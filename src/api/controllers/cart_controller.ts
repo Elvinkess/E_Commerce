@@ -3,6 +3,7 @@ import { ICartLogic } from "../../core/usecase/interface/logic/cart_logic";
 import { addItemCartRequest } from "../../core/domain/dto/requests/add_cart_item";
 import { IUserLogic } from "../../core/usecase/interface/logic/user_logic";
 import { AuthRequest } from "../middleware/auth_role_middleware";
+import { HttpErrors } from "../../core/domain/entity/shared/error";
 
 
 export class  CartController{
@@ -21,13 +22,18 @@ export class  CartController{
             res.json(cart)
             
         } catch (err) {
+
+            if (err instanceof HttpErrors) {return res.status(err.statusCode).json({ error: err.message })}
             res.json({error: (err as Error).message})
             
         }
     }
     addCartItem = async(req : Request<{}, {}, addItemCartRequest>, res: Response, next: NextFunction)=>{
         try {
+            
+
             let requestData = req.body
+            console.log(requestData)
             if(!requestData.user_id && !requestData.guest_id){ return  res.status(400).json({ error: "Either userId or guestId must be provided" });}
 
             if (!requestData.product_id) {return res.status(400).json({ error: "product_id is required" }) }
@@ -42,8 +48,9 @@ export class  CartController{
             let updateCart = await this.cart.addItemToCart(requestDataProcessed);
             res.status(200).json({message: "Item added to cart successfully",data: updateCart});
             
-        } catch (err:any) {
-            res.status(500).json({ error: err.message || "Failed to add item to cart" })
+        } catch (err) {
+            if (err instanceof HttpErrors) {return res.status(err.statusCode).json({ error: err.message })}
+            res.status(500).json({ error: (err  as  Error).message || "Failed to add item to cart" })
         }
     }
 
@@ -67,8 +74,9 @@ export class  CartController{
 
             res.status(200).json({message: "Item updated successfully",data: updateCart});
             
-        } catch (err:any) {
-            res.status(500).json({ error: err.message || "Failed to update item in cart" })
+        } catch (err) {
+            if (err instanceof HttpErrors) {return res.status(err.statusCode).json({ error: err.message })}
+            res.status(500).json({ error: (err as  Error).message || "Failed to update item in cart" })
         }
     }
 
@@ -85,7 +93,8 @@ export class  CartController{
             res.status(200).json({message: "Item removed from cart successfully",data: updateCart});
             
         } catch (err:any) {
-            res.status(500).json({ error: err.message || "Failed to remove item from cart" })
+            if (err instanceof HttpErrors) {return res.status(err.statusCode).json({ error: err.message })}
+            res.status(500).json({ error: (err as Error).message })
         }
     }
 
@@ -103,6 +112,7 @@ export class  CartController{
             res.status(200).json(remove)
             
         } catch (err) {
+            if (err instanceof HttpErrors) {return res.status(err.statusCode).json({ error: err.message })}
             res.status(500).json({ error: (err as Error).message }); 
             
         }
@@ -112,7 +122,6 @@ export class  CartController{
         try {
             const token = req.cookies?.token;
             if (!token) {res.status(401).json({ message: "Unauthorized" });return}
-                console.log("in merge controller")
             console.log(req.user?.id,"user id")
 
             const userId = Number(req.user?.id)
@@ -123,13 +132,13 @@ export class  CartController{
             }
             let cart = await this.cart.mergeCart(userId,guestId);
             if (!cart) {return res.status(200).json({ message: "No guest cart to merge", cart: null })}
-            console.log("merged success")
             return res.status(200).json(cart);
 
             
         } catch (err:any) {
             console.log("not merged")
-            res.status(500).json({ error: err.message || "Failed to merge cart" });
+            if (err instanceof HttpErrors) {return res.status(err.statusCode).json({ error: err.message })}
+            res.status(500).json({ error: (err as Error).message});
 
             
         }

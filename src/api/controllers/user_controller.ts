@@ -2,9 +2,9 @@ import { NextFunction, Request, Response } from "express";
 import { User } from "../../core/domain/entity/user";
 import { IUserLogic } from "../../core/usecase/interface/logic/user_logic";
 import { SignInUserDTO } from "../../core/domain/dto/requests/user_requests";
-import { UserLogic } from "../../core/usecase/logic/user_logic_implementation";
+import { HttpErrors } from "../../core/domain/entity/shared/error";
 
-// uses the usecase to make appropriate calls from the client (express)
+
 export class UserController {
     
     constructor(private userLogic: IUserLogic) {
@@ -14,8 +14,9 @@ export class UserController {
         try{
             let user = await this.userLogic.createUser(req.body);
             res.json(user)
-        } catch(ex){
-            res.json({error: (ex as Error).message})
+        } catch(err){
+            if(err instanceof HttpErrors){return res.status(err.statusCode).json({ error: err.message })}
+            res.json({error: (err as Error).message})
         }
     }
 
@@ -37,8 +38,9 @@ export class UserController {
                 user: { email, username,id },
             });
     
-        } catch (ex) {
-            res.status(400).json({ error: (ex as Error).message });
+        } catch (err) {
+            if(err instanceof HttpErrors){return res.status(err.statusCode).json({ error: err.message })}
+            res.status(400).json({ error: (err as Error).message });
         }
     };
     decodeUser = async (req: Request<{}, {}, {}>, res: Response, next: NextFunction) => {
@@ -50,6 +52,7 @@ export class UserController {
             const payload =  this.userLogic.decodedjwt(token)
             res.json({ user: payload });
         } catch (err) {
+            if(err instanceof HttpErrors){return res.status(err.statusCode).json({ error: err.message })}
             res.status(400).json({ error: (err as Error).message });
         }
     };

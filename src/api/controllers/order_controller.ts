@@ -1,3 +1,4 @@
+import { HttpErrors } from "../../core/domain/entity/shared/error";
 import { IOrderLogic } from "../../core/usecase/interface/logic/order_logic";
 import {Request, Response,NextFunction} from "express"
 
@@ -17,6 +18,7 @@ export class OrderController{
             res.json(order)
             
         } catch (err) {
+            if(err instanceof HttpErrors){return res.status(err.statusCode).json({ error: err.message })}
             res.status(500).json({ error: (err as Error).message });
 
             
@@ -30,6 +32,7 @@ export class OrderController{
             res.json(order)
             
         } catch (err) {
+            if(err instanceof HttpErrors){return res.status(err.statusCode).json({ error: err.message })}
             res.status(500).json({ error: (err as Error).message });
 
         }
@@ -48,6 +51,7 @@ export class OrderController{
             res.status(200).json(payment)
             
         } catch (err) {
+            if(err instanceof HttpErrors){return res.status(err.statusCode).json({ error: err.message })}
             res.status(500).json({ error: (err as Error).message });
             
         }
@@ -70,6 +74,7 @@ export class OrderController{
             res.status(200).json(removeOrder)
             
         } catch (err) {
+            if(err instanceof HttpErrors){return res.status(err.statusCode).json({ error: err.message })}
             res.status(500).json({ error: (err as Error).message });
             
         }
@@ -83,6 +88,7 @@ export class OrderController{
                 res.status(200).json(confirmPayment)
                 
             } catch (err) {
+                if(err instanceof HttpErrors){return res.status(err.statusCode).json({ error: err.message })}
                 res.status(500).json({ error: (err as Error).message });
                 
             }

@@ -2,6 +2,8 @@ import { Categories } from "../../domain/entity/categories";
 import { ICategoriesLogic } from "../interface/logic/categories_logic";
 import { ICategoriesDB } from "../interface/data_access/categories_db";
 import { IProductDB } from "../interface/data_access/product_db";
+import { BadRequestError } from "../utilities/Errors/bad_request";
+import { NotFoundError } from "../utilities/Errors/not_found_request";
 
 export class CategoriesLogic  implements ICategoriesLogic{
     constructor(private categoriesDb:ICategoriesDB,private productDb:IProductDB){
@@ -10,7 +12,7 @@ export class CategoriesLogic  implements ICategoriesLogic{
     create = async (categories:Categories):Promise<Categories>=> {
         let  cat = await this.categoriesDb.get({name: categories.name})
         if(cat.length){
-            throw new Error("Category with name exists: " + categories.name)
+            throw new BadRequestError("Category with name exists: " + categories.name)
         }
         let category = await this.categoriesDb.save(categories);
         return category
@@ -25,7 +27,7 @@ export class CategoriesLogic  implements ICategoriesLogic{
     
         console.log({categories, cat})
         if(!cat || !cat.length){
-            throw new Error(`Category with id ${categories.id} does not  exists`)
+            throw new NotFoundError(`Category with id ${categories.id} does not  exists`)
         }
         return await this.categoriesDb.remove({id: categories.id});
         
@@ -35,14 +37,13 @@ export class CategoriesLogic  implements ICategoriesLogic{
         // get category with id from db
         let  category = await this.categoriesDb.getOne({id: categoryId});
         if(!category){
-            throw new Error(`Category with id ${categoryId} does not  exists`)
+            throw new NotFoundError(`Category with id ${categoryId} does not  exists`)
         }
         // if category is found 
         // get all products  having the category id 
         let products = await this.productDb.get({category_id: categoryId})
 
         category.products=products
-        console.log(category)
         return category
 
 

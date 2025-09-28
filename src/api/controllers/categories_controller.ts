@@ -2,6 +2,7 @@ import { Categories } from "../../core/domain/entity/categories";
 import { ICategoriesLogic } from "../../core/usecase/interface/logic/categories_logic";
 import {Request, Response,NextFunction} from "express"
 import { IProductLogic } from "../../core/usecase/interface/logic/product_logic";
+import { HttpErrors } from "../../core/domain/entity/shared/error";
 
 export class CategoriesController{
 
@@ -13,6 +14,7 @@ export class CategoriesController{
             let categories = await this.categories.create(req.body)
             res.json(categories);
         } catch (err) {
+            if(err instanceof HttpErrors){return res.status(err.statusCode).json({ error: err.message })}
             res.json({error: (err as Error).message})
         }
     }
@@ -21,6 +23,7 @@ export class CategoriesController{
             let removeCat = await this.categories.remove(req.body)
             res.json(removeCat)
         } catch (err) {
+            if(err instanceof HttpErrors){return res.status(err.statusCode).json({ error: err.message })}
             res.json({error: (err as Error).message})
         }
     }
@@ -31,6 +34,7 @@ export class CategoriesController{
             res.json(AllCategories);
             
         } catch (err) {
+            if(err instanceof HttpErrors){return res.status(err.statusCode).json({ error: err.message })}
             res.json({error: (err as Error).message})
         }
     }
@@ -40,10 +44,9 @@ export class CategoriesController{
             let AllCatprodcts = await  this.categories.getCategoryproducts(req.body.id)
             res.json(AllCatprodcts)
         } catch (err) {
+            if(err instanceof HttpErrors){return res.status(err.statusCode).json({ error: err.message })}
             res.json({error: (err as Error).message})
         }
     }
-
-    
     
 }

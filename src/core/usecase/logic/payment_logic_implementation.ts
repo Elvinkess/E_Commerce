@@ -5,6 +5,7 @@ import { IPaymentLogic } from "../interface/logic/payment_logic";
 import { IPaymentService } from "../interface/services/payment_service";
 
 import { confirmPaymentResponse, FlwConfirmPaymentRes } from "../../domain/dto/responses/payment_service_responses/flw_confirm_payment_res";
+import { BadRequestError } from "../utilities/Errors/bad_request";
 
 
 
@@ -25,11 +26,10 @@ export class Paymentlogic implements IPaymentLogic{
 
         let confirmPayment = await this.paymentService.confirmPayment(transactionRef);
         
-        console.log(confirmPayment,"this is the confirmpayment")
         if (confirmPayment === null){throw new Error()}
-        else if(confirmPayment.status !== "success"){    throw new Error(confirmPayment.message)}
-        else if(totalAmount  !== confirmPayment.data?.amount){throw new Error("you paid: " +confirmPayment.data?.amount + " instead of :" + totalAmount)}
-        else if(confirmPayment.data?.currency !=="NGN"){throw new Error("The currency you paid with isn't NGN")}
+        else if(confirmPayment.status !== "success"){ throw new BadRequestError(confirmPayment.message)}
+        else if(totalAmount  !== confirmPayment.data?.amount){throw new BadRequestError("you paid: " +confirmPayment.data?.amount + " instead of :" + totalAmount)}
+        else if(confirmPayment.data?.currency !=="NGN"){throw new BadRequestError("The currency you paid with isn't NGN")}
         else if(confirmPayment.data.status === "successful"){return confirmPayment.data} 
         else throw new Error("Payment not successful")
         

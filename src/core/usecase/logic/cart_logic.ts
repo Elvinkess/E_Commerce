@@ -5,6 +5,8 @@ import { CartItemResponse, CartResponse, productInCartRes } from "../../domain/d
 import { Cart } from "../../domain/entity/cart";
 import { CartItem } from "../../domain/entity/cart_item";
 import { cart_status } from "../../domain/enums/cart_status_enum";
+import { BadRequestError } from "../utilities/Errors/bad_request";
+import { NotFoundError } from "../utilities/Errors/not_found_request";
 import { ICartCache } from "../interface/data_access/cart_cache_db";
 import { ICartDB } from "../interface/data_access/cart_db";
 import { ICartItemDB } from "../interface/data_access/cart_item_db";
@@ -21,19 +23,17 @@ export class CartLogic implements ICartLogic{
     }
  
     get= async (userId:number|null,guestId:string | null): Promise< CartResponse | null>=>{
-      if(!userId && !guestId){throw new Error("Either of userId or guestId must be available")}
+      if(!userId && !guestId){throw new BadRequestError("Either of userId or guestId must be available")}
       //hit the redis server to get cart before the DB
       const cachedCart = await this.cartCache.getCartResponse(userId,guestId);
       if (cachedCart) {
-        console.log("from cache")
         return cachedCart;
       }
         let activeCart = userId  ?  await this.cartDB.getOne({user_id:userId,user_status:cart_status.ACTIVE}) : await this.cartDB.getOne({ guest_id: guestId, user_status: cart_status.ACTIVE });
 
         if(!activeCart){
-          throw new Error("No cart found")
+          throw new NotFoundError("No cart found")
         }
-               
         let cartItems =  await this.cartItemDB.get({cart_id:activeCart?.id}) 
         let productsInCartItems =await this.productDB.comparisonSearch({_in:{id:cartItems.map(item => item.product_id)}})
         let cartProducts  = await this.productlogic.convertProductsToProductResponsesEfficient (productsInCartItems)
@@ -59,20 +59,20 @@ export class CartLogic implements ICartLogic{
     addItemToCart = async (req: addItemCartRequest): Promise<CartResponse> => {
 
       // Validation: must have either user_id or guest_id
-      if (!req.user_id && !req.guest_id) {throw new Error("Either user_id or guest_id must be provided");}
+      if (!req.user_id && !req.guest_id) {throw new BadRequestError("Either user_id or guest_id must be provided");}
 
       // If logged-in user, check user existence
       if(req.user_id ){
         let user = await this.userDB.getOne({ id: req.user_id });
-        if (!user) throw new Error("User does not exist");
+        if (!user) throw new NotFoundError("User does not exist");
       }
     
     //Validate product and inventory
       let product = await this.productDB.getOne({ id: req.product_id });
-      if (!product) throw new Error("Product does not exist");
+      if (!product) throw new NotFoundError("Product does not exist");
     
       let productInventory = await this.inventoryDB.getOne({ id: product.inventory_id });
-      if (!productInventory) throw new Error("Product inventory not found");
+      if (!productInventory) throw new NotFoundError("Product inventory not found");
     
       // find active cart(user or guest)
       let cart = req.user_id ? await this.cartDB.getOne({ user_id: req.user_id, user_status: cart_status.ACTIVE }) : await this.cartDB.getOne({ guest_id: req.guest_id, user_status: cart_status.ACTIVE })
@@ -88,7 +88,7 @@ export class CartLogic implements ICartLogic{
     
       let totalQuantity = existingItem ? existingItem.quantity + req.quantity : req.quantity;
       if (totalQuantity > productInventory.quantity_available) {
-        throw new Error("Not enough inventory available");
+        throw new BadRequestError("Not enough inventory available");
       } 
     
 
@@ -109,20 +109,21 @@ export class CartLogic implements ICartLogic{
     };
     
     updateCartItem = async(req: UpdateCartItem): Promise<CartResponse>=> {
-      if(!req.userId && !req.guestId){throw new Error ("Either of userId or guestId must be provided")}
+      if(!req.userId && !req.guestId){throw new BadRequestError ("Either of userId or guestId must be provided")}
       const productId = Number(req.productId)
       
       const cart = req.userId ? await this.cartDB.getOne({user_id:req.userId,user_status:cart_status.ACTIVE}) :await this.cartDB.getOne({guest_id:req.guestId,user_status:cart_status.ACTIVE}) 
-      if(!cart){throw new Error("cart not found")}
+      if(!cart){throw new NotFoundError("cart not found")}
 
       const cartItem = await this.cartItemDB.getOne({cart_id:cart.id,product_id:productId})
-      if(!cartItem){throw new Error("cart item not found")}
+      if(!cartItem){throw new NotFoundError("cart item not found")}
 
       await this.cartItemDB.update({id:cartItem.id},{quantity:req.quantity})
       await this.cartCache.clearCart(req.userId,req.guestId);
 
       const updatedCart = await this.get(req.userId,req.guestId);
       if (!updatedCart) throw new Error("Failed to retrieve updated cart");
+      await this.cartCache.clearCart(req.userId,req.guestId)
 
       return updatedCart;
 
@@ -132,18 +133,18 @@ export class CartLogic implements ICartLogic{
     removeItemFromCart = async (req: RemoveCartItem): Promise<CartResponse> => {
       const { userId,guestId, productId } = req;
 
-      if(!userId && !guestId){throw new Error("Either of userId or guestId must be available")}
+      if(!userId && !guestId){throw new BadRequestError("Either of userId or guestId must be available")}
     
       // Step 1: Get active cart for this user
       const cart = userId ? await this.cartDB.getOne({user_id: userId,user_status: cart_status.ACTIVE}) : await this.cartDB.getOne({guest_id:guestId,user_status: cart_status.ACTIVE})
-      if (!cart) throw new Error("Cart does not exist");
+      if (!cart) throw new NotFoundError("Cart does not exist");
     
       // Step 2: Check if product is in cart
       const cartItem = await this.cartItemDB.getOne({
         cart_id: cart.id,
         product_id: productId
       });
-      if (!cartItem) throw new Error("Product not found in cart");
+      if (!cartItem) throw new NotFoundError("Product not found in cart");
     
       // Step 3: Remove item completely
       await this.cartItemDB.remove({ id: cartItem.id });
@@ -161,7 +162,7 @@ export class CartLogic implements ICartLogic{
     if(!userId && !guestId){throw new Error("Either of userId or guestId must be available")}
 
     let cart = userId ? await  this.cartDB.getOne({user_id:userId,user_status:cart_status.ACTIVE}) :  await  this.cartDB.getOne({guest_id:guestId,user_status:cart_status.ACTIVE})
-    if(!cart){ throw new Error("There's no active  cart to delete")}
+    if(!cart){ throw new NotFoundError("There's no active  cart to delete")}
     let cartToRemove = await this.cartDB.remove({id:cart.id})
     await this.cartCache.clearCart(cart.user_id,guestId); // Clears the redit server from serfing same cart if it was present 
     return cartToRemove
@@ -171,7 +172,7 @@ export class CartLogic implements ICartLogic{
 
 
   mergeCart = async (userId: number | null, guestId: string | null): Promise<CartResponse | null> => {
-    if (!userId || !guestId) { throw new Error("Both userId and guestId must be available")}
+    if (!userId || !guestId) { throw new BadRequestError("Both userId and guestId must be available")}
   
     //Fetch guest cart
     const guestCart = await this.cartDB.getOne({guest_id: guestId,user_status: cart_status.ACTIVE});

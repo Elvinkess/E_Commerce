@@ -11,6 +11,8 @@ import { IUserDb } from "../interface/data_access/user_db";
 import { CreateDeliveryRequest, IDeliveryLogic } from "../interface/logic/delivery_logic";
 import { IOrderLogic } from "../interface/logic/order_logic";
 import { CancelShippingResponse, CreateShippingRequest, CreateShippingResponse, DsWebhookResponse, GetShippingratesRequest, IDeliveryService, StandardSBResponse } from "../interface/services/delivery_service";
+import { BadRequestError } from "../utilities/Errors/bad_request";
+import { NotFoundError } from "../utilities/Errors/not_found_request";
 
 export interface PackageItem {
     name:string
@@ -35,14 +37,14 @@ export class DeliveryLogic implements IDeliveryLogic{
 
 
         let order = createDeliveryRequest.orderDetails
-        if(!order){throw new Error("ORDER not found!!");}
-        if(order.status === OrderStatus.DELIVERED){throw new Error("Order has already been delivered")}
+        if(!order){throw new NotFoundError("ORDER not found!!");}
+        if(order.status === OrderStatus.DELIVERED){throw new BadRequestError("Order has already been delivered")}
 
         let user = await this.userDB.getOne({id:order.user_id});
-        if(!user){throw new Error("USER not found!!")}
+        if(!user){throw new NotFoundError("USER not found!!")}
 
         let address = await this.addressDB.getOne({user_id:user?.id});
-        if(!address){ throw new Error("Please add  an  address")}
+        if(!address){ throw new BadRequestError("Please add an  address")}
 
         let shippingRate = await this.getDeliveryFee(createDeliveryRequest)
 
@@ -89,7 +91,7 @@ export class DeliveryLogic implements IDeliveryLogic{
     cancelDelivery = async(shippingId: string): Promise<CancelShippingResponse> => {
   
         let shipping = await this.deliveryDb.getOne({shippingid:shippingId})
-        if(!shipping){throw new Error(` There is no shpping with this ID: ${shippingId}`)}
+        if(!shipping){throw new BadRequestError(` There is no shpping with this ID: ${shippingId}`)}
         let cancelshipping = await this.deliveryService.cancelShipping(shipping.shippingid)
         await this.deliveryDb.update({id:shipping.id},{status:delivery_status.CANCELLED})
         return cancelshipping
@@ -113,15 +115,15 @@ export class DeliveryLogic implements IDeliveryLogic{
     getDeliveryFee = async(createDeliveryRequest:CreateDeliveryRequest): Promise<StandardSBResponse> =>{
 
         let order = createDeliveryRequest.orderDetails
-        if(!order){throw new Error("ORDER not found!!");}
-        if(order.status === OrderStatus.DELIVERED){throw new Error("Order has already been delivered")}
+        if(!order){throw new NotFoundError("ORDER not found!!");}
+        if(order.status === OrderStatus.DELIVERED){throw new BadRequestError("Order has already been delivered")}
 
         let user = await this.userDB.getOne({id:order.user_id});
-        if(!user){throw new Error("USER not found!!")}
+        if(!user){throw new NotFoundError("USER not found!!")}
 
         let address = await this.addressDB.getOne({user_id:user?.id});
         
-        if(!address){ throw new Error("Please add  an  address")}
+        if(!address){ throw new BadRequestError("Please add  an  address")}
     
         let orderCat = order.Order_items[0].product?.category?.name
       

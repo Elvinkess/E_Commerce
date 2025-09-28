@@ -7,6 +7,8 @@ import { SignInUserDTO } from "../../domain/dto/requests/user_requests";
 import jwt from 'jsonwebtoken'
 import { SignInUserResponse } from "../../domain/dto/responses/user_response";
 import { JwtPayload } from "../../domain/dto/requests/jwtpayload";
+import { BadRequestError } from "../utilities/Errors/bad_request";
+import { NotFoundError } from "../utilities/Errors/not_found_request";
 
 
 export class UserLogic implements IUserLogic{
@@ -21,7 +23,7 @@ export class UserLogic implements IUserLogic{
         console.log({userExists, mail: user.email})
         if(userExists.length){
             // if user exists throw error
-            throw new Error("User with email exists")
+            throw new BadRequestError("User with email exists")
         }
         // hash password
         let hashedPassword = this.hashPassword(user.password);
@@ -56,7 +58,7 @@ export class UserLogic implements IUserLogic{
         // get user with email
         let user = await this.userDb.getOne({email: signInDTO.email});
         if(!user){
-            throw new Error("User with email does not exist");
+            throw new NotFoundError("User with email does not exist");
         }
 
         
@@ -64,7 +66,7 @@ export class UserLogic implements IUserLogic{
         let currentPasswordHash = this.hashPassword(signInDTO.password);
 
         if(user.password !== currentPasswordHash){
-            throw new Error("Invalid password")
+            throw new BadRequestError("Invalid password")
         }
 
         // user is signed in // 
@@ -91,6 +93,4 @@ export class UserLogic implements IUserLogic{
       
     }
 
-    
-    
 }

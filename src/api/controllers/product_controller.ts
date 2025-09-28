@@ -7,6 +7,7 @@ import { Product } from "../../core/domain/entity/product";
 import BaseController from "./base_controller";
 import UploadFile from "../../core/domain/entity/shared/uploadfile";
 import { updateProductReq } from "../../core/domain/dto/requests/update_product";
+import { HttpErrors } from "../../core/domain/entity/shared/error";
 
 // uses the usecase to make appropriate calls from the client (express)
 export class ProductController extends BaseController {
@@ -22,6 +23,7 @@ export class ProductController extends BaseController {
             let productResponse: ProductResponse = await this.productLogic.create(req.body);
             res.json(productResponse)
         } catch(err){
+            if(err instanceof HttpErrors){return res.status(err.statusCode).json({ error: err.message })}
             res.json({error: (err as Error).message})
         }
     }
@@ -34,14 +36,14 @@ export class ProductController extends BaseController {
               
             let productResponse: ProductResponse = await this.productLogic.getOne(productId);
             res.status(200).json({message: "Item updated successfully",data:productResponse});
-        } catch(err:any){
-            res.status(500).json({ error: err.message })
+        } catch(err){
+            if(err instanceof HttpErrors){return res.status(err.statusCode).json({ error: err.message })}
+            res.status(500).json({ error: (err as Error).message })
         }
     }
     createProductWithImage = async (req : Request<{}, {}>, res: Response, next: NextFunction) => {
         
         try{
-            console.log("in controller")
             let prodImg: UploadFile | null = this.convertReqFilesToUploadFiles(req, "image")[0]
             let reqBody = req.body.data;
             let createProoductBody = JSON.parse(reqBody) as CreateProduct
@@ -49,6 +51,7 @@ export class ProductController extends BaseController {
             let productResponse: ProductResponse = await this.productLogic.createWithImage(createProoductBody);
             res.json(productResponse)
         } catch(err){
+            if(err instanceof HttpErrors){return res.status(err.statusCode).json({ error: err.message })}
             res.json({error: (err as Error).message})
         }
     }
@@ -57,6 +60,7 @@ export class ProductController extends BaseController {
             let product:Product[] = await this.productLogic.search(req.body)
             res.json(product)
         } catch (err) {
+            if(err instanceof HttpErrors){return res.status(err.statusCode).json({ error: err.message })}
             res.json({error: (err as Error).message})
         }
     }
@@ -67,6 +71,7 @@ export class ProductController extends BaseController {
             res.json(updateProduct);
             
         } catch (err) {
+            if(err instanceof HttpErrors){return res.status(err.statusCode).json({ error: err.message })}
             res.json({error: (err as Error).message})
         }
     }
@@ -77,6 +82,7 @@ export class ProductController extends BaseController {
             res.json(Allproducts);
             
         } catch (err) {
+            if(err instanceof HttpErrors){return res.status(err.statusCode).json({ error: err.message })}
             res.json({error: (err as Error).message})
         }
     }
@@ -88,16 +94,18 @@ export class ProductController extends BaseController {
             const products = await this.productLogic.getAllPaginate(page,limit)
             res.json(products)
         } catch (err) {
+            if(err instanceof HttpErrors){return res.status(err.statusCode).json({ error: err.message })}
             res.json({error: (err as Error).message})
         }
     }
     remove= async(req:Request<{productId:number},{},{}>,res:Response,next:NextFunction)=>{
         try {
-            console.log("in remove")
+    
             const{productId}= req.params
             const response = await this.productLogic.remove(productId)
             res.json(response)
         } catch (err) {
+            if(err instanceof HttpErrors){return res.status(err.statusCode).json({ error: err.message })}
             res.json({error: (err as Error).message})
         }
     }

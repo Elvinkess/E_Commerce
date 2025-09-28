@@ -11,6 +11,8 @@ import { IInventoryDB } from "../interface/data_access/inventory_db";
 import { IProductDB } from "../interface/data_access/product_db";
 import { IProductLogic } from "../interface/logic/product_logic";
 import IFileService from "../interface/services/file_service";
+import { BadRequestError } from "../utilities/Errors/bad_request";
+import { NotFoundError } from "../utilities/Errors/not_found_request";
 
 export class ProductLogic implements  IProductLogic {
    
@@ -32,7 +34,7 @@ export class ProductLogic implements  IProductLogic {
     update = async (req: updateProductReq): Promise<ProductResponse> => {
         let product = await this.productDb.getOne({ id: req.id });
         if (!product) {
-          throw new Error("Product not found");
+          throw new NotFoundError("Product not found");
         }
       
         const updateData: Partial<Product> = {};
@@ -67,7 +69,7 @@ export class ProductLogic implements  IProductLogic {
     remove =async(productId: number): Promise<boolean>=> {
         const product = await this.productDb.getOne({id:productId})
 
-        if(!product){throw new Error("Product does not exist")}
+        if(!product){throw new NotFoundError("Product does not exist")}
 
         await this.productDb.remove({id:productId})
         await this.inventoryDb.remove({product_id:product.id})
@@ -79,7 +81,7 @@ export class ProductLogic implements  IProductLogic {
 
     getOne =async(productId: number): Promise<ProductResponse> =>{
         const prod =await this.productDb.getOne({id:productId})
-        if(!prod){throw new Error("Product not found")}
+        if(!prod){throw new NotFoundError("Product not found")}
         return this.convertProductToProductResponse(prod)
         
     }
@@ -88,19 +90,17 @@ export class ProductLogic implements  IProductLogic {
         // verify category exists 
         let category: Categories | null = await this.categoryDb.getOne({id: create_product.category_id})
         if(!category){
-            throw new Error(`Category with id ${create_product.category_id} does not exist`)
+            throw new NotFoundError(`Category with id ${create_product.category_id} does not exist`)
         }
 
         // create inventory for product
         let productInventory = new inventory(create_product.quantity_available, 0, 0)
         let savedProductInventory: inventory | null = await this.inventoryDb.save(productInventory)
-        console.log(savedProductInventory.id,"inventory ID")
 
         // add inventory  to product
         let productToSave = new Product(create_product.name, create_product.price, category.id, savedProductInventory.id);
         let savedProduct = await this.productDb.save(productToSave);
         savedProductInventory.product_id = savedProduct.id
-        console.log(savedProduct.id,"product ID")
         await this.inventoryDb.save(savedProductInventory)
 
         // save product
@@ -110,7 +110,7 @@ export class ProductLogic implements  IProductLogic {
 
     createWithImage = async (req: CreateProduct): Promise<ProductResponse> => {
         if (!req.category_name) {
-          throw new Error("Category Name not Provided");
+          throw new BadRequestError("Category Name not Provided");
         }
       
         // normalize category name (avoid duplicates like "Books" vs "books")

@@ -1,6 +1,7 @@
 import {  Request,Response,NextFunction } from "express"
 import { AddressRequest, IAddressLogic } from "../../core/usecase/interface/logic/address_logic"
 import { Address } from "../../core/domain/entity/address"
+import { HttpErrors } from "../../core/domain/entity/shared/error";
 
 
     
@@ -14,6 +15,7 @@ export class  AddressController{
             
             
         } catch (err) {
+            if(err instanceof HttpErrors){return res.status(err.statusCode).json({ error: err.message })}
             res.json({error: (err as Error).message})
         }
     }
@@ -23,8 +25,9 @@ export class  AddressController{
             const id = Number(userId)
             const address = await this.address.getAddress(id)
             res.status(200).json(address)
-         } catch (error) {
-            res.status(500).json({ error: (error as Error).message });
+         } catch (err) {
+            if(err instanceof HttpErrors){return res.status(err.statusCode).json({ error: err.message })}
+            res.status(500).json({ error: (err as Error).message });
             
          }
     }

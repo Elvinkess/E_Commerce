@@ -21,6 +21,8 @@ import { ICartLogic } from "../interface/logic/cart_logic";
 import { CreateDeliveryRequest, IDeliveryLogic } from "../interface/logic/delivery_logic";
 import { IOrderLogic } from "../interface/logic/order_logic";
 import { IPaymentLogic } from "../interface/logic/payment_logic";
+import { BadRequestError } from "../utilities/Errors/bad_request";
+import { NotFoundError } from "../utilities/Errors/not_found_request";
 import { RandomUtility } from "../utilities/random_utility";
 
 export class OrderLogic implements IOrderLogic{
@@ -69,7 +71,7 @@ export class OrderLogic implements IOrderLogic{
 
 
     get = async (userId: number|null,guestId:string|null): Promise<OrderResponse> => {
-      if(!userId && !guestId){throw new Error("Either of userId or guestId must be available")}
+      if(!userId && !guestId){throw new BadRequestError("Either of userId or guestId must be available")}
 
       let totalAmount = 0;
       let orderedItems: OrderItemResponse[] = [];
@@ -143,14 +145,14 @@ export class OrderLogic implements IOrderLogic{
     remove = async (orderId: number, userId: number | null, guestId: string | null): Promise<string> => {
       // validate userId and guestId
       if (!userId && !guestId) {
-        throw new Error("Either userId or guestId must be available");
+        throw new BadRequestError("Either userId or guestId must be available");
       }
       let order;
 
       if (userId) {
         // check user exists
         const user = await this.userDB.getOne({ id: userId });
-        if (!user) throw new Error("User does not exist");
+        if (!user) throw new NotFoundError("User does not exist");
     
         // fetch order belonging to user
         order = await this.orderDB.getOne({ id: orderId, user_id: userId });
@@ -160,11 +162,11 @@ export class OrderLogic implements IOrderLogic{
       }
     
       if (!order) {
-        throw new Error("Order does not exist or does not belong to this account");
+        throw new NotFoundError("Order does not exist or does not belong to this account");
       }
     
       if (order.status !== OrderStatus.PENDING) {
-        throw new Error("Only pending orders can be removed");
+        throw new BadRequestError("Only pending orders can be removed");
       }
     
       // remove associated records
@@ -182,15 +184,15 @@ export class OrderLogic implements IOrderLogic{
 
     payForOrder = async(orderId:number,guestEmail?:string):Promise<CreateOrderPaymentresponse> =>{
         let order = await this.orderDB.getOne({id:orderId})
-        if(!order){throw new Error("ORDER not found!!");}
-        if(order.status === OrderStatus.PAID){throw new Error("User already paid")}
+        if(!order){throw new NotFoundError("ORDER not found!!");}
+        if(order.status === OrderStatus.PAID){throw new BadRequestError("User already paid")}
 
         let user = order.user_id ? await this.userDB.getOne({ id: order.user_id }) : null;
 
        // Validate that either user exists OR guestId+guestEmail is provided
         if (!user) {
          if (!order.guest_id || !guestEmail) {
-            throw new Error("Order must belong to a registered user or have a valid guest with email");
+            throw new BadRequestError("Order must belong to a registered user or have a valid guest with email");
          }
        }
 
@@ -223,11 +225,11 @@ export class OrderLogic implements IOrderLogic{
     processCompletedPaymentForOrder = async(transactionRef:string):Promise<any> =>{
 
         let payment = await this.orderPaymentDB.getOne({transactionReference:transactionRef});
-        if(payment === null){throw new Error("There is no initiated payment for this order")}
+        if(payment === null){throw new BadRequestError("There is no initiated payment for this order")}
         let order = await this.orderDB.getOne({id:payment?.orderId});
         
 
-        if(payment?.status == paymentStatus.PAID ){  throw Error(`This payment with transactionRef: ${transactionRef} has been paid and completed`)}
+        if(payment?.status == paymentStatus.PAID ){  throw new BadRequestError(`This payment with transactionRef: ${transactionRef} has been paid and completed`)}
         let totalAmount = payment.amount + payment.deliveryamount
         
         
@@ -235,8 +237,8 @@ export class OrderLogic implements IOrderLogic{
                 
         let updatedOrderPayment = await this.orderPaymentDB.update({id:payment?.id},{processorReference:confirmPayment.processor_response,status:paymentStatus.PAID,remarks:confirmPayment.status})
         
-        if(!order){throw new Error("ORDER not found!!");}
-        if(order.status === OrderStatus.PAID){throw new Error("User already paid")}
+        if(!order){throw new NotFoundError("ORDER not found!!");}
+        if(order.status === OrderStatus.PAID){throw new BadRequestError("User already paid")}
         let deliveryDate = await this.deliveryLogic.getDeliveryDate(order)
       
 
@@ -278,7 +280,6 @@ export class OrderLogic implements IOrderLogic{
         if (order.guest_id) {
           where.guest_id = order.guest_id;
         }
-        console.log("Updating cart with filter:", where);
         await this.cartDB.update(where, { user_status: cart_status.INACTIVE });
 
         await this.orderDB.update({ id: order?.id }, { status: OrderStatus.PAID });
