@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { User } from "../../core/domain/entity/user";
 import { IUserLogic } from "../../core/usecase/interface/logic/user_logic";
 import { SignInUserDTO } from "../../core/domain/dto/requests/user_requests";
-import { HttpErrors } from "../../core/domain/entity/shared/error";
+import { HttpErrors } from "../../core/domain/entity/error";
 
 
 export class UserController {

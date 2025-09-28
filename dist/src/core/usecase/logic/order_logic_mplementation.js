@@ -185,8 +185,9 @@ class OrderLogic {
                 throw new bad_request_1.BadRequestError("There is no initiated payment for this order");
             }
             let order = yield this.orderDB.getOne({ id: payment === null || payment === void 0 ? void 0 : payment.orderId });
+            console.log(payment);
             if ((payment === null || payment === void 0 ? void 0 : payment.status) == payment_status_enums_1.paymentStatus.PAID) {
-                throw new bad_request_1.BadRequestError(`This payment with transactionRef: ${transactionRef} has been paid and completed`);
+                throw new bad_request_1.BadRequestError(`This payment with transactionRef: ${transactionRef} has been ${payment.status}`);
             }
             let totalAmount = payment.amount + payment.deliveryamount;
             let confirmPayment = yield this.paymentLogic.confirmPayment(transactionRef, totalAmount);

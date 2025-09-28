@@ -7,7 +7,7 @@ import { Product } from "../../core/domain/entity/product";
 import BaseController from "./base_controller";
 import UploadFile from "../../core/domain/entity/shared/uploadfile";
 import { updateProductReq } from "../../core/domain/dto/requests/update_product";
-import { HttpErrors } from "../../core/domain/entity/shared/error";
+import { HttpErrors } from "../../core/domain/entity/error";
 
 // uses the usecase to make appropriate calls from the client (express)
 export class ProductController extends BaseController {

@@ -1,7 +1,7 @@
 import { Request,Response,NextFunction } from "express";
 import { IDeliveryLogic } from "../../core/usecase/interface/logic/delivery_logic";
 import { DsWebhookResponse } from "../../core/usecase/interface/services/delivery_service";
-import { HttpErrors } from "../../core/domain/entity/shared/error";
+import { HttpErrors } from "../../core/domain/entity/error";
 
 
 export class DeliveryController{

@@ -1,4 +1,4 @@
-import { HttpErrors } from "../../core/domain/entity/shared/error";
+import { HttpErrors } from "../../core/domain/entity/error";
 import { IOrderLogic } from "../../core/usecase/interface/logic/order_logic";
 import {Request, Response,NextFunction} from "express"
 

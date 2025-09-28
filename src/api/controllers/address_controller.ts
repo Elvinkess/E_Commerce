@@ -1,7 +1,7 @@
 import {  Request,Response,NextFunction } from "express"
 import { AddressRequest, IAddressLogic } from "../../core/usecase/interface/logic/address_logic"
 import { Address } from "../../core/domain/entity/address"
-import { HttpErrors } from "../../core/domain/entity/shared/error";
+import { HttpErrors } from "../../core/domain/entity/error";
 
 
     

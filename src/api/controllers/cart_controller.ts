@@ -3,7 +3,7 @@ import { ICartLogic } from "../../core/usecase/interface/logic/cart_logic";
 import { addItemCartRequest } from "../../core/domain/dto/requests/add_cart_item";
 import { IUserLogic } from "../../core/usecase/interface/logic/user_logic";
 import { AuthRequest } from "../middleware/auth_role_middleware";
-import { HttpErrors } from "../../core/domain/entity/shared/error";
+import { HttpErrors } from "../../core/domain/entity/error";
 
 
 export class  CartController{

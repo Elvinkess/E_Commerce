@@ -2,7 +2,7 @@ import { Categories } from "../../core/domain/entity/categories";
 import { ICategoriesLogic } from "../../core/usecase/interface/logic/categories_logic";
 import {Request, Response,NextFunction} from "express"
 import { IProductLogic } from "../../core/usecase/interface/logic/product_logic";
-import { HttpErrors } from "../../core/domain/entity/shared/error";
+import { HttpErrors } from "../../core/domain/entity/error";
 
 export class CategoriesController{
 

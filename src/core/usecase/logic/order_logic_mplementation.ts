@@ -228,7 +228,6 @@ export class OrderLogic implements IOrderLogic{
         if(payment === null){throw new BadRequestError("There is no initiated payment for this order")}
         let order = await this.orderDB.getOne({id:payment?.orderId});
         
-
         if(payment?.status == paymentStatus.PAID ){  throw new BadRequestError(`This payment with transactionRef: ${transactionRef} has been paid and completed`)}
         let totalAmount = payment.amount + payment.deliveryamount
         
