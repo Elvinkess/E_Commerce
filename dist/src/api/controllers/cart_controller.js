@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CartController = void 0;
+const error_1 = require("../../core/domain/entity/shared/error");
 class CartController {
     constructor(cart) {
         this.cart = cart;
@@ -24,12 +25,16 @@ class CartController {
                 res.json(cart);
             }
             catch (err) {
+                if (err instanceof error_1.HttpErrors) {
+                    return res.status(err.statusCode).json({ error: err.message });
+                }
                 res.json({ error: err.message });
             }
         });
         this.addCartItem = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             try {
                 let requestData = req.body;
+                console.log(requestData);
                 if (!requestData.user_id && !requestData.guest_id) {
                     return res.status(400).json({ error: "Either userId or guestId must be provided" });
                 }
@@ -44,6 +49,9 @@ class CartController {
                 res.status(200).json({ message: "Item added to cart successfully", data: updateCart });
             }
             catch (err) {
+                if (err instanceof error_1.HttpErrors) {
+                    return res.status(err.statusCode).json({ error: err.message });
+                }
                 res.status(500).json({ error: err.message || "Failed to add item to cart" });
             }
         });
@@ -66,6 +74,9 @@ class CartController {
                 res.status(200).json({ message: "Item updated successfully", data: updateCart });
             }
             catch (err) {
+                if (err instanceof error_1.HttpErrors) {
+                    return res.status(err.statusCode).json({ error: err.message });
+                }
                 res.status(500).json({ error: err.message || "Failed to update item in cart" });
             }
         });
@@ -81,7 +92,10 @@ class CartController {
                 res.status(200).json({ message: "Item removed from cart successfully", data: updateCart });
             }
             catch (err) {
-                res.status(500).json({ error: err.message || "Failed to remove item from cart" });
+                if (err instanceof error_1.HttpErrors) {
+                    return res.status(err.statusCode).json({ error: err.message });
+                }
+                res.status(500).json({ error: err.message });
             }
         });
         this.remove = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
@@ -97,6 +111,9 @@ class CartController {
                 res.status(200).json(remove);
             }
             catch (err) {
+                if (err instanceof error_1.HttpErrors) {
+                    return res.status(err.statusCode).json({ error: err.message });
+                }
                 res.status(500).json({ error: err.message });
             }
         });
@@ -108,7 +125,6 @@ class CartController {
                     res.status(401).json({ message: "Unauthorized" });
                     return;
                 }
-                console.log("in merge controller");
                 console.log((_b = req.user) === null || _b === void 0 ? void 0 : _b.id, "user id");
                 const userId = Number((_c = req.user) === null || _c === void 0 ? void 0 : _c.id);
                 const guestId = req.query.guestId ? String(req.query.guestId) : null;
@@ -119,12 +135,14 @@ class CartController {
                 if (!cart) {
                     return res.status(200).json({ message: "No guest cart to merge", cart: null });
                 }
-                console.log("merged success");
                 return res.status(200).json(cart);
             }
             catch (err) {
                 console.log("not merged");
-                res.status(500).json({ error: err.message || "Failed to merge cart" });
+                if (err instanceof error_1.HttpErrors) {
+                    return res.status(err.statusCode).json({ error: err.message });
+                }
+                res.status(500).json({ error: err.message });
             }
         });
     }

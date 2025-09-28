@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrderController = void 0;
+const error_1 = require("../../core/domain/entity/shared/error");
 class OrderController {
     constructor(order) {
         this.order = order;
@@ -25,6 +26,9 @@ class OrderController {
                 res.json(order);
             }
             catch (err) {
+                if (err instanceof error_1.HttpErrors) {
+                    return res.status(err.statusCode).json({ error: err.message });
+                }
                 res.status(500).json({ error: err.message });
             }
         });
@@ -34,6 +38,9 @@ class OrderController {
                 res.json(order);
             }
             catch (err) {
+                if (err instanceof error_1.HttpErrors) {
+                    return res.status(err.statusCode).json({ error: err.message });
+                }
                 res.status(500).json({ error: err.message });
             }
         });
@@ -49,6 +56,9 @@ class OrderController {
                 res.status(200).json(payment);
             }
             catch (err) {
+                if (err instanceof error_1.HttpErrors) {
+                    return res.status(err.statusCode).json({ error: err.message });
+                }
                 res.status(500).json({ error: err.message });
             }
         });
@@ -67,6 +77,9 @@ class OrderController {
                 res.status(200).json(removeOrder);
             }
             catch (err) {
+                if (err instanceof error_1.HttpErrors) {
+                    return res.status(err.statusCode).json({ error: err.message });
+                }
                 res.status(500).json({ error: err.message });
             }
         });
@@ -77,6 +90,9 @@ class OrderController {
                 res.status(200).json(confirmPayment);
             }
             catch (err) {
+                if (err instanceof error_1.HttpErrors) {
+                    return res.status(err.statusCode).json({ error: err.message });
+                }
                 res.status(500).json({ error: err.message });
             }
         });

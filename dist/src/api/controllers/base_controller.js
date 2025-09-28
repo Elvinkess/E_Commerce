@@ -25,24 +25,6 @@ class BaseController {
                     uploadFiles = files.map(file => new uploadfile_1.default("", file.path));
                 }
                 else {
-                    /**
-                     * Example of how files may  look like
-                     * {
-                            image: [
-                                {
-                                fieldname: 'image',
-                                originalname: 'download-small.jpeg',
-                                encoding: '7bit',
-                                mimetype: 'image/jpeg',
-                                destination: 'uploads/',
-                                filename: 'image-1734789174485-137801869.jpeg',
-                                path: 'uploads/image-1734789174485-137801869.jpeg',
-                                size: 9804
-                                }
-                            ]
-                            }
-                     *
-                     */
                     uploadFiles = (_c = (_b = files === null || files === void 0 ? void 0 : files[fieldName]) === null || _b === void 0 ? void 0 : _b.map(file => new uploadfile_1.default("", file.path))) !== null && _c !== void 0 ? _c : [];
                 }
                 return uploadFiles;

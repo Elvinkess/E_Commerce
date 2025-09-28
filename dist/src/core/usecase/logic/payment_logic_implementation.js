@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Paymentlogic = void 0;
+const bad_request_1 = require("../utilities/Errors/bad_request");
 class Paymentlogic {
     constructor(orderPaymentDB, paymentService) {
         this.orderPaymentDB = orderPaymentDB;
@@ -23,18 +24,17 @@ class Paymentlogic {
         this.confirmPayment = (transactionRef, totalAmount) => __awaiter(this, void 0, void 0, function* () {
             var _a, _b, _c;
             let confirmPayment = yield this.paymentService.confirmPayment(transactionRef);
-            console.log(confirmPayment, "this is the confirmpayment");
             if (confirmPayment === null) {
                 throw new Error();
             }
             else if (confirmPayment.status !== "success") {
-                throw new Error(confirmPayment.message);
+                throw new bad_request_1.BadRequestError(confirmPayment.message);
             }
             else if (totalAmount !== ((_a = confirmPayment.data) === null || _a === void 0 ? void 0 : _a.amount)) {
-                throw new Error("you paid: " + ((_b = confirmPayment.data) === null || _b === void 0 ? void 0 : _b.amount) + " instead of :" + totalAmount);
+                throw new bad_request_1.BadRequestError("you paid: " + ((_b = confirmPayment.data) === null || _b === void 0 ? void 0 : _b.amount) + " instead of :" + totalAmount);
             }
             else if (((_c = confirmPayment.data) === null || _c === void 0 ? void 0 : _c.currency) !== "NGN") {
-                throw new Error("The currency you paid with isn't NGN");
+                throw new bad_request_1.BadRequestError("The currency you paid with isn't NGN");
             }
             else if (confirmPayment.data.status === "successful") {
                 return confirmPayment.data;

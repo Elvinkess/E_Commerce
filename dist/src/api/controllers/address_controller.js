@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AddressController = void 0;
+const error_1 = require("../../core/domain/entity/shared/error");
 class AddressController {
     constructor(address) {
         this.address = address;
@@ -19,6 +20,9 @@ class AddressController {
                 res.json(address);
             }
             catch (err) {
+                if (err instanceof error_1.HttpErrors) {
+                    return res.status(err.statusCode).json({ error: err.message });
+                }
                 res.json({ error: err.message });
             }
         });
@@ -29,8 +33,11 @@ class AddressController {
                 const address = yield this.address.getAddress(id);
                 res.status(200).json(address);
             }
-            catch (error) {
-                res.status(500).json({ error: error.message });
+            catch (err) {
+                if (err instanceof error_1.HttpErrors) {
+                    return res.status(err.statusCode).json({ error: err.message });
+                }
+                res.status(500).json({ error: err.message });
             }
         });
     }

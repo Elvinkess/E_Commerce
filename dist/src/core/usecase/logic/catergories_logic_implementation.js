@@ -10,6 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CategoriesLogic = void 0;
+const bad_request_1 = require("../utilities/Errors/bad_request");
+const not_found_request_1 = require("../utilities/Errors/not_found_request");
 class CategoriesLogic {
     constructor(categoriesDb, productDb) {
         this.categoriesDb = categoriesDb;
@@ -17,7 +19,7 @@ class CategoriesLogic {
         this.create = (categories) => __awaiter(this, void 0, void 0, function* () {
             let cat = yield this.categoriesDb.get({ name: categories.name });
             if (cat.length) {
-                throw new Error("Category with name exists: " + categories.name);
+                throw new bad_request_1.BadRequestError("Category with name exists: " + categories.name);
             }
             let category = yield this.categoriesDb.save(categories);
             return category;
@@ -29,7 +31,7 @@ class CategoriesLogic {
             let cat = yield this.categoriesDb.get({ id: categories.id });
             console.log({ categories, cat });
             if (!cat || !cat.length) {
-                throw new Error(`Category with id ${categories.id} does not  exists`);
+                throw new not_found_request_1.NotFoundError(`Category with id ${categories.id} does not  exists`);
             }
             return yield this.categoriesDb.remove({ id: categories.id });
         });
@@ -37,13 +39,12 @@ class CategoriesLogic {
             // get category with id from db
             let category = yield this.categoriesDb.getOne({ id: categoryId });
             if (!category) {
-                throw new Error(`Category with id ${categoryId} does not  exists`);
+                throw new not_found_request_1.NotFoundError(`Category with id ${categoryId} does not  exists`);
             }
             // if category is found 
             // get all products  having the category id 
             let products = yield this.productDb.get({ category_id: categoryId });
             category.products = products;
-            console.log(category);
             return category;
             // category.products = productsResponse
             // return category

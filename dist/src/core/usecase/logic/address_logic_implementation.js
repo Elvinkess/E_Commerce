@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AddressLogic = void 0;
 const address_1 = require("../../domain/entity/address");
+const bad_request_1 = require("../utilities/Errors/bad_request");
 class AddressLogic {
     constructor(addressDB, deliveryService, userDB) {
         this.addressDB = addressDB;
@@ -19,7 +20,7 @@ class AddressLogic {
         this.getAddress = (userId) => __awaiter(this, void 0, void 0, function* () {
             let address = yield this.addressDB.getOne({ user_id: userId });
             if (!address) {
-                throw new Error("Add a Valid Address");
+                throw new bad_request_1.BadRequestError("Add a Valid Address");
             }
             return address;
         });
@@ -32,11 +33,11 @@ class AddressLogic {
             };
             const user = address.user_id ? yield this.userDB.getOne({ id: address.user_id }) : null;
             if (!user && !address.guest_id) {
-                throw new Error("Address must be associated with either a valid user or a guest");
+                throw new bad_request_1.BadRequestError("Address must be associated with either a valid user or a guest");
             }
             let validateAddress = yield this.deliveryService.validateAddress(validateReq);
             if (!validateAddress.data.address_code) {
-                throw new Error("Please use a valid address");
+                throw new bad_request_1.BadRequestError("Please use a valid address");
             }
             else {
                 let saveAddress = new address_1.Address(address.name, address.email, address.phone, validateAddress.data.address_code, address.user_id, address.guest_id, address.address);

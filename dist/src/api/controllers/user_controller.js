@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
-// uses the usecase to make appropriate calls from the client (express)
+const error_1 = require("../../core/domain/entity/shared/error");
 class UserController {
     constructor(userLogic) {
         this.userLogic = userLogic;
@@ -19,8 +19,11 @@ class UserController {
                 let user = yield this.userLogic.createUser(req.body);
                 res.json(user);
             }
-            catch (ex) {
-                res.json({ error: ex.message });
+            catch (err) {
+                if (err instanceof error_1.HttpErrors) {
+                    return res.status(err.statusCode).json({ error: err.message });
+                }
+                res.json({ error: err.message });
             }
         });
         this.signInUser = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
@@ -38,8 +41,11 @@ class UserController {
                     user: { email, username, id },
                 });
             }
-            catch (ex) {
-                res.status(400).json({ error: ex.message });
+            catch (err) {
+                if (err instanceof error_1.HttpErrors) {
+                    return res.status(err.statusCode).json({ error: err.message });
+                }
+                res.status(400).json({ error: err.message });
             }
         });
         this.decodeUser = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
@@ -54,6 +60,9 @@ class UserController {
                 res.json({ user: payload });
             }
             catch (err) {
+                if (err instanceof error_1.HttpErrors) {
+                    return res.status(err.statusCode).json({ error: err.message });
+                }
                 res.status(400).json({ error: err.message });
             }
         });

@@ -15,6 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserLogic = void 0;
 const crypto_1 = require("crypto");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const bad_request_1 = require("../utilities/Errors/bad_request");
+const not_found_request_1 = require("../utilities/Errors/not_found_request");
 class UserLogic {
     constructor(userDb) {
         this.userDb = userDb;
@@ -24,7 +26,7 @@ class UserLogic {
             console.log({ userExists, mail: user.email });
             if (userExists.length) {
                 // if user exists throw error
-                throw new Error("User with email exists");
+                throw new bad_request_1.BadRequestError("User with email exists");
             }
             // hash password
             let hashedPassword = this.hashPassword(user.password);
@@ -51,12 +53,12 @@ class UserLogic {
             // get user with email
             let user = yield this.userDb.getOne({ email: signInDTO.email });
             if (!user) {
-                throw new Error("User with email does not exist");
+                throw new not_found_request_1.NotFoundError("User with email does not exist");
             }
             // hash user password
             let currentPasswordHash = this.hashPassword(signInDTO.password);
             if (user.password !== currentPasswordHash) {
-                throw new Error("Invalid password");
+                throw new bad_request_1.BadRequestError("Invalid password");
             }
             // user is signed in // 
             let dataToEncrypt = {

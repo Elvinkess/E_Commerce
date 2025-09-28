@@ -14,6 +14,8 @@ const product_response_1 = require("../../domain/dto/responses/product_response"
 const categories_1 = require("../../domain/entity/categories");
 const inventory_1 = require("../../domain/entity/inventory");
 const product_1 = require("../../domain/entity/product");
+const bad_request_1 = require("../utilities/Errors/bad_request");
+const not_found_request_1 = require("../utilities/Errors/not_found_request");
 class ProductLogic {
     constructor(categoryDb, inventoryDb, productDb, fileService) {
         this.categoryDb = categoryDb;
@@ -28,7 +30,7 @@ class ProductLogic {
         this.update = (req) => __awaiter(this, void 0, void 0, function* () {
             let product = yield this.productDb.getOne({ id: req.id });
             if (!product) {
-                throw new Error("Product not found");
+                throw new not_found_request_1.NotFoundError("Product not found");
             }
             const updateData = {};
             let uploadedFile = null;
@@ -57,7 +59,7 @@ class ProductLogic {
         this.remove = (productId) => __awaiter(this, void 0, void 0, function* () {
             const product = yield this.productDb.getOne({ id: productId });
             if (!product) {
-                throw new Error("Product does not exist");
+                throw new not_found_request_1.NotFoundError("Product does not exist");
             }
             yield this.productDb.remove({ id: productId });
             yield this.inventoryDb.remove({ product_id: product.id });
@@ -66,7 +68,7 @@ class ProductLogic {
         this.getOne = (productId) => __awaiter(this, void 0, void 0, function* () {
             const prod = yield this.productDb.getOne({ id: productId });
             if (!prod) {
-                throw new Error("Product not found");
+                throw new not_found_request_1.NotFoundError("Product not found");
             }
             return this.convertProductToProductResponse(prod);
         });
@@ -74,17 +76,15 @@ class ProductLogic {
             // verify category exists 
             let category = yield this.categoryDb.getOne({ id: create_product.category_id });
             if (!category) {
-                throw new Error(`Category with id ${create_product.category_id} does not exist`);
+                throw new not_found_request_1.NotFoundError(`Category with id ${create_product.category_id} does not exist`);
             }
             // create inventory for product
             let productInventory = new inventory_1.inventory(create_product.quantity_available, 0, 0);
             let savedProductInventory = yield this.inventoryDb.save(productInventory);
-            console.log(savedProductInventory.id, "inventory ID");
             // add inventory  to product
             let productToSave = new product_1.Product(create_product.name, create_product.price, category.id, savedProductInventory.id);
             let savedProduct = yield this.productDb.save(productToSave);
             savedProductInventory.product_id = savedProduct.id;
-            console.log(savedProduct.id, "product ID");
             yield this.inventoryDb.save(savedProductInventory);
             // save product
             return new product_response_1.ProductResponse(Object.assign(Object.assign({}, savedProduct), { category: category, inventory: savedProductInventory }));
@@ -93,7 +93,7 @@ class ProductLogic {
         this.createWithImage = (req) => __awaiter(this, void 0, void 0, function* () {
             var _a;
             if (!req.category_name) {
-                throw new Error("Category Name not Provided");
+                throw new bad_request_1.BadRequestError("Category Name not Provided");
             }
             // normalize category name (avoid duplicates like "Books" vs "books")
             const categoryName = req.category_name.toUpperCase();

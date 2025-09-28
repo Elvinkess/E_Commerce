@@ -18,6 +18,8 @@ const order_payment_1 = require("../../domain/entity/order_payment");
 const cart_status_enum_1 = require("../../domain/enums/cart_status_enum");
 const order_items_1 = require("../../domain/enums/order_items");
 const payment_status_enums_1 = require("../../domain/enums/payment_status_enums");
+const bad_request_1 = require("../utilities/Errors/bad_request");
+const not_found_request_1 = require("../utilities/Errors/not_found_request");
 const random_utility_1 = require("../utilities/random_utility");
 class OrderLogic {
     constructor(orderDB, orderItemDB, cartDB, productDB, userDB, cartLogic, inventoryDB, deliveryLogic, paymentLogic, orderPaymentDB, deliveryDB, cartCache) {
@@ -56,7 +58,7 @@ class OrderLogic {
         this.get = (userId, guestId) => __awaiter(this, void 0, void 0, function* () {
             var _a, _b, _c;
             if (!userId && !guestId) {
-                throw new Error("Either of userId or guestId must be available");
+                throw new bad_request_1.BadRequestError("Either of userId or guestId must be available");
             }
             let totalAmount = 0;
             let orderedItems = [];
@@ -114,14 +116,14 @@ class OrderLogic {
         this.remove = (orderId, userId, guestId) => __awaiter(this, void 0, void 0, function* () {
             // validate userId and guestId
             if (!userId && !guestId) {
-                throw new Error("Either userId or guestId must be available");
+                throw new bad_request_1.BadRequestError("Either userId or guestId must be available");
             }
             let order;
             if (userId) {
                 // check user exists
                 const user = yield this.userDB.getOne({ id: userId });
                 if (!user)
-                    throw new Error("User does not exist");
+                    throw new not_found_request_1.NotFoundError("User does not exist");
                 // fetch order belonging to user
                 order = yield this.orderDB.getOne({ id: orderId, user_id: userId });
             }
@@ -130,10 +132,10 @@ class OrderLogic {
                 order = yield this.orderDB.getOne({ id: orderId, guest_id: guestId });
             }
             if (!order) {
-                throw new Error("Order does not exist or does not belong to this account");
+                throw new not_found_request_1.NotFoundError("Order does not exist or does not belong to this account");
             }
             if (order.status !== order_items_1.OrderStatus.PENDING) {
-                throw new Error("Only pending orders can be removed");
+                throw new bad_request_1.BadRequestError("Only pending orders can be removed");
             }
             // remove associated records
             yield this.orderItemDB.removeMany({ order_id: orderId });
@@ -146,16 +148,16 @@ class OrderLogic {
             var _a;
             let order = yield this.orderDB.getOne({ id: orderId });
             if (!order) {
-                throw new Error("ORDER not found!!");
+                throw new not_found_request_1.NotFoundError("ORDER not found!!");
             }
             if (order.status === order_items_1.OrderStatus.PAID) {
-                throw new Error("User already paid");
+                throw new bad_request_1.BadRequestError("User already paid");
             }
             let user = order.user_id ? yield this.userDB.getOne({ id: order.user_id }) : null;
             // Validate that either user exists OR guestId+guestEmail is provided
             if (!user) {
                 if (!order.guest_id || !guestEmail) {
-                    throw new Error("Order must belong to a registered user or have a valid guest with email");
+                    throw new bad_request_1.BadRequestError("Order must belong to a registered user or have a valid guest with email");
                 }
             }
             let date = new Date();
@@ -180,20 +182,20 @@ class OrderLogic {
             var _a, _b;
             let payment = yield this.orderPaymentDB.getOne({ transactionReference: transactionRef });
             if (payment === null) {
-                throw new Error("There is no initiated payment for this order");
+                throw new bad_request_1.BadRequestError("There is no initiated payment for this order");
             }
             let order = yield this.orderDB.getOne({ id: payment === null || payment === void 0 ? void 0 : payment.orderId });
             if ((payment === null || payment === void 0 ? void 0 : payment.status) == payment_status_enums_1.paymentStatus.PAID) {
-                throw Error(`This payment with transactionRef: ${transactionRef} has been paid and completed`);
+                throw new bad_request_1.BadRequestError(`This payment with transactionRef: ${transactionRef} has been paid and completed`);
             }
             let totalAmount = payment.amount + payment.deliveryamount;
             let confirmPayment = yield this.paymentLogic.confirmPayment(transactionRef, totalAmount);
             let updatedOrderPayment = yield this.orderPaymentDB.update({ id: payment === null || payment === void 0 ? void 0 : payment.id }, { processorReference: confirmPayment.processor_response, status: payment_status_enums_1.paymentStatus.PAID, remarks: confirmPayment.status });
             if (!order) {
-                throw new Error("ORDER not found!!");
+                throw new not_found_request_1.NotFoundError("ORDER not found!!");
             }
             if (order.status === order_items_1.OrderStatus.PAID) {
-                throw new Error("User already paid");
+                throw new bad_request_1.BadRequestError("User already paid");
             }
             let deliveryDate = yield this.deliveryLogic.getDeliveryDate(order);
             let deliveryreq = {
@@ -220,7 +222,6 @@ class OrderLogic {
             if (order.guest_id) {
                 where.guest_id = order.guest_id;
             }
-            console.log("Updating cart with filter:", where);
             yield this.cartDB.update(where, { user_status: cart_status_enum_1.cart_status.INACTIVE });
             yield this.orderDB.update({ id: order === null || order === void 0 ? void 0 : order.id }, { status: order_items_1.OrderStatus.PAID });
             yield this.deliveryDB.update({ orderid: order === null || order === void 0 ? void 0 : order.id }, { status: delivery_1.delivery_status.PAID });

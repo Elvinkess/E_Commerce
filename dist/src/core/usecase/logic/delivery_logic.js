@@ -13,6 +13,8 @@ exports.DeliveryLogic = void 0;
 const program_1 = require("../../../api/program");
 const delivery_1 = require("../../domain/entity/delivery");
 const order_items_1 = require("../../domain/enums/order_items");
+const bad_request_1 = require("../utilities/Errors/bad_request");
+const not_found_request_1 = require("../utilities/Errors/not_found_request");
 class DeliveryLogic {
     constructor(deliveryService, userDB, addressDB, deliveryDb, productDB) {
         this.deliveryService = deliveryService;
@@ -23,18 +25,18 @@ class DeliveryLogic {
         this.createDelivery = (createDeliveryRequest) => __awaiter(this, void 0, void 0, function* () {
             let order = createDeliveryRequest.orderDetails;
             if (!order) {
-                throw new Error("ORDER not found!!");
+                throw new not_found_request_1.NotFoundError("ORDER not found!!");
             }
             if (order.status === order_items_1.OrderStatus.DELIVERED) {
-                throw new Error("Order has already been delivered");
+                throw new bad_request_1.BadRequestError("Order has already been delivered");
             }
             let user = yield this.userDB.getOne({ id: order.user_id });
             if (!user) {
-                throw new Error("USER not found!!");
+                throw new not_found_request_1.NotFoundError("USER not found!!");
             }
             let address = yield this.addressDB.getOne({ user_id: user === null || user === void 0 ? void 0 : user.id });
             if (!address) {
-                throw new Error("Please add  an  address");
+                throw new bad_request_1.BadRequestError("Please add an  address");
             }
             let shippingRate = yield this.getDeliveryFee(createDeliveryRequest);
             //  Variables needed to create a shipment most gotten from the shippingrate response
@@ -67,7 +69,7 @@ class DeliveryLogic {
         this.cancelDelivery = (shippingId) => __awaiter(this, void 0, void 0, function* () {
             let shipping = yield this.deliveryDb.getOne({ shippingid: shippingId });
             if (!shipping) {
-                throw new Error(` There is no shpping with this ID: ${shippingId}`);
+                throw new bad_request_1.BadRequestError(` There is no shpping with this ID: ${shippingId}`);
             }
             let cancelshipping = yield this.deliveryService.cancelShipping(shipping.shippingid);
             yield this.deliveryDb.update({ id: shipping.id }, { status: delivery_1.delivery_status.CANCELLED });
@@ -89,18 +91,18 @@ class DeliveryLogic {
             var _a, _b, _c;
             let order = createDeliveryRequest.orderDetails;
             if (!order) {
-                throw new Error("ORDER not found!!");
+                throw new not_found_request_1.NotFoundError("ORDER not found!!");
             }
             if (order.status === order_items_1.OrderStatus.DELIVERED) {
-                throw new Error("Order has already been delivered");
+                throw new bad_request_1.BadRequestError("Order has already been delivered");
             }
             let user = yield this.userDB.getOne({ id: order.user_id });
             if (!user) {
-                throw new Error("USER not found!!");
+                throw new not_found_request_1.NotFoundError("USER not found!!");
             }
             let address = yield this.addressDB.getOne({ user_id: user === null || user === void 0 ? void 0 : user.id });
             if (!address) {
-                throw new Error("Please add  an  address");
+                throw new bad_request_1.BadRequestError("Please add  an  address");
             }
             let orderCat = (_b = (_a = order.Order_items[0].product) === null || _a === void 0 ? void 0 : _a.category) === null || _b === void 0 ? void 0 : _b.name;
             //get  category id to identify the type of order for the delivery service

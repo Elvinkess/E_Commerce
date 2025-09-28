@@ -14,6 +14,8 @@ const product_cart_response_1 = require("../../domain/dto/responses/product_cart
 const cart_1 = require("../../domain/entity/cart");
 const cart_item_1 = require("../../domain/entity/cart_item");
 const cart_status_enum_1 = require("../../domain/enums/cart_status_enum");
+const bad_request_1 = require("../utilities/Errors/bad_request");
+const not_found_request_1 = require("../utilities/Errors/not_found_request");
 class CartLogic {
     constructor(cartDB, userDB, cartItemDB, productDB, productlogic, cartCache, inventoryDB) {
         this.cartDB = cartDB;
@@ -25,17 +27,16 @@ class CartLogic {
         this.inventoryDB = inventoryDB;
         this.get = (userId, guestId) => __awaiter(this, void 0, void 0, function* () {
             if (!userId && !guestId) {
-                throw new Error("Either of userId or guestId must be available");
+                throw new bad_request_1.BadRequestError("Either of userId or guestId must be available");
             }
             //hit the redis server to get cart before the DB
             const cachedCart = yield this.cartCache.getCartResponse(userId, guestId);
             if (cachedCart) {
-                console.log("from cache");
                 return cachedCart;
             }
             let activeCart = userId ? yield this.cartDB.getOne({ user_id: userId, user_status: cart_status_enum_1.cart_status.ACTIVE }) : yield this.cartDB.getOne({ guest_id: guestId, user_status: cart_status_enum_1.cart_status.ACTIVE });
             if (!activeCart) {
-                throw new Error("No cart found");
+                throw new not_found_request_1.NotFoundError("No cart found");
             }
             let cartItems = yield this.cartItemDB.get({ cart_id: activeCart === null || activeCart === void 0 ? void 0 : activeCart.id });
             let productsInCartItems = yield this.productDB.comparisonSearch({ _in: { id: cartItems.map(item => item.product_id) } });
@@ -55,21 +56,21 @@ class CartLogic {
         this.addItemToCart = (req) => __awaiter(this, void 0, void 0, function* () {
             // Validation: must have either user_id or guest_id
             if (!req.user_id && !req.guest_id) {
-                throw new Error("Either user_id or guest_id must be provided");
+                throw new bad_request_1.BadRequestError("Either user_id or guest_id must be provided");
             }
             // If logged-in user, check user existence
             if (req.user_id) {
                 let user = yield this.userDB.getOne({ id: req.user_id });
                 if (!user)
-                    throw new Error("User does not exist");
+                    throw new not_found_request_1.NotFoundError("User does not exist");
             }
             //Validate product and inventory
             let product = yield this.productDB.getOne({ id: req.product_id });
             if (!product)
-                throw new Error("Product does not exist");
+                throw new not_found_request_1.NotFoundError("Product does not exist");
             let productInventory = yield this.inventoryDB.getOne({ id: product.inventory_id });
             if (!productInventory)
-                throw new Error("Product inventory not found");
+                throw new not_found_request_1.NotFoundError("Product inventory not found");
             // find active cart(user or guest)
             let cart = req.user_id ? yield this.cartDB.getOne({ user_id: req.user_id, user_status: cart_status_enum_1.cart_status.ACTIVE }) : yield this.cartDB.getOne({ guest_id: req.guest_id, user_status: cart_status_enum_1.cart_status.ACTIVE });
             // if no active cart create a new one
@@ -81,7 +82,7 @@ class CartLogic {
             let existingItem = yield this.cartItemDB.getOne({ cart_id: cart.id, product_id: req.product_id });
             let totalQuantity = existingItem ? existingItem.quantity + req.quantity : req.quantity;
             if (totalQuantity > productInventory.quantity_available) {
-                throw new Error("Not enough inventory available");
+                throw new bad_request_1.BadRequestError("Not enough inventory available");
             }
             //Add or update item
             if (existingItem) {
@@ -99,40 +100,41 @@ class CartLogic {
         });
         this.updateCartItem = (req) => __awaiter(this, void 0, void 0, function* () {
             if (!req.userId && !req.guestId) {
-                throw new Error("Either of userId or guestId must be provided");
+                throw new bad_request_1.BadRequestError("Either of userId or guestId must be provided");
             }
             const productId = Number(req.productId);
             const cart = req.userId ? yield this.cartDB.getOne({ user_id: req.userId, user_status: cart_status_enum_1.cart_status.ACTIVE }) : yield this.cartDB.getOne({ guest_id: req.guestId, user_status: cart_status_enum_1.cart_status.ACTIVE });
             if (!cart) {
-                throw new Error("cart not found");
+                throw new not_found_request_1.NotFoundError("cart not found");
             }
             const cartItem = yield this.cartItemDB.getOne({ cart_id: cart.id, product_id: productId });
             if (!cartItem) {
-                throw new Error("cart item not found");
+                throw new not_found_request_1.NotFoundError("cart item not found");
             }
             yield this.cartItemDB.update({ id: cartItem.id }, { quantity: req.quantity });
             yield this.cartCache.clearCart(req.userId, req.guestId);
             const updatedCart = yield this.get(req.userId, req.guestId);
             if (!updatedCart)
                 throw new Error("Failed to retrieve updated cart");
+            yield this.cartCache.clearCart(req.userId, req.guestId);
             return updatedCart;
         });
         this.removeItemFromCart = (req) => __awaiter(this, void 0, void 0, function* () {
             const { userId, guestId, productId } = req;
             if (!userId && !guestId) {
-                throw new Error("Either of userId or guestId must be available");
+                throw new bad_request_1.BadRequestError("Either of userId or guestId must be available");
             }
             // Step 1: Get active cart for this user
             const cart = userId ? yield this.cartDB.getOne({ user_id: userId, user_status: cart_status_enum_1.cart_status.ACTIVE }) : yield this.cartDB.getOne({ guest_id: guestId, user_status: cart_status_enum_1.cart_status.ACTIVE });
             if (!cart)
-                throw new Error("Cart does not exist");
+                throw new not_found_request_1.NotFoundError("Cart does not exist");
             // Step 2: Check if product is in cart
             const cartItem = yield this.cartItemDB.getOne({
                 cart_id: cart.id,
                 product_id: productId
             });
             if (!cartItem)
-                throw new Error("Product not found in cart");
+                throw new not_found_request_1.NotFoundError("Product not found in cart");
             // Step 3: Remove item completely
             yield this.cartItemDB.remove({ id: cartItem.id });
             // Step 4: Clear cache and return updated cart
@@ -148,7 +150,7 @@ class CartLogic {
             }
             let cart = userId ? yield this.cartDB.getOne({ user_id: userId, user_status: cart_status_enum_1.cart_status.ACTIVE }) : yield this.cartDB.getOne({ guest_id: guestId, user_status: cart_status_enum_1.cart_status.ACTIVE });
             if (!cart) {
-                throw new Error("There's no active  cart to delete");
+                throw new not_found_request_1.NotFoundError("There's no active  cart to delete");
             }
             let cartToRemove = yield this.cartDB.remove({ id: cart.id });
             yield this.cartCache.clearCart(cart.user_id, guestId); // Clears the redit server from serfing same cart if it was present 
@@ -156,7 +158,7 @@ class CartLogic {
         });
         this.mergeCart = (userId, guestId) => __awaiter(this, void 0, void 0, function* () {
             if (!userId || !guestId) {
-                throw new Error("Both userId and guestId must be available");
+                throw new bad_request_1.BadRequestError("Both userId and guestId must be available");
             }
             //Fetch guest cart
             const guestCart = yield this.cartDB.getOne({ guest_id: guestId, user_status: cart_status_enum_1.cart_status.ACTIVE });

@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductController = void 0;
 const base_controller_1 = __importDefault(require("./base_controller"));
+const error_1 = require("../../core/domain/entity/shared/error");
 // uses the usecase to make appropriate calls from the client (express)
 class ProductController extends base_controller_1.default {
     constructor(productLogic) {
@@ -25,6 +26,9 @@ class ProductController extends base_controller_1.default {
                 res.json(productResponse);
             }
             catch (err) {
+                if (err instanceof error_1.HttpErrors) {
+                    return res.status(err.statusCode).json({ error: err.message });
+                }
                 res.json({ error: err.message });
             }
         });
@@ -38,12 +42,14 @@ class ProductController extends base_controller_1.default {
                 res.status(200).json({ message: "Item updated successfully", data: productResponse });
             }
             catch (err) {
+                if (err instanceof error_1.HttpErrors) {
+                    return res.status(err.statusCode).json({ error: err.message });
+                }
                 res.status(500).json({ error: err.message });
             }
         });
         this.createProductWithImage = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             try {
-                console.log("in controller");
                 let prodImg = this.convertReqFilesToUploadFiles(req, "image")[0];
                 let reqBody = req.body.data;
                 let createProoductBody = JSON.parse(reqBody);
@@ -52,6 +58,9 @@ class ProductController extends base_controller_1.default {
                 res.json(productResponse);
             }
             catch (err) {
+                if (err instanceof error_1.HttpErrors) {
+                    return res.status(err.statusCode).json({ error: err.message });
+                }
                 res.json({ error: err.message });
             }
         });
@@ -61,6 +70,9 @@ class ProductController extends base_controller_1.default {
                 res.json(product);
             }
             catch (err) {
+                if (err instanceof error_1.HttpErrors) {
+                    return res.status(err.statusCode).json({ error: err.message });
+                }
                 res.json({ error: err.message });
             }
         });
@@ -71,6 +83,9 @@ class ProductController extends base_controller_1.default {
                 res.json(updateProduct);
             }
             catch (err) {
+                if (err instanceof error_1.HttpErrors) {
+                    return res.status(err.statusCode).json({ error: err.message });
+                }
                 res.json({ error: err.message });
             }
         });
@@ -80,6 +95,9 @@ class ProductController extends base_controller_1.default {
                 res.json(Allproducts);
             }
             catch (err) {
+                if (err instanceof error_1.HttpErrors) {
+                    return res.status(err.statusCode).json({ error: err.message });
+                }
                 res.json({ error: err.message });
             }
         });
@@ -94,17 +112,22 @@ class ProductController extends base_controller_1.default {
                 res.json(products);
             }
             catch (err) {
+                if (err instanceof error_1.HttpErrors) {
+                    return res.status(err.statusCode).json({ error: err.message });
+                }
                 res.json({ error: err.message });
             }
         });
         this.remove = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             try {
-                console.log("in remove");
                 const { productId } = req.params;
                 const response = yield this.productLogic.remove(productId);
                 res.json(response);
             }
             catch (err) {
+                if (err instanceof error_1.HttpErrors) {
+                    return res.status(err.statusCode).json({ error: err.message });
+                }
                 res.json({ error: err.message });
             }
         });
