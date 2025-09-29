@@ -103,6 +103,16 @@ NodeCommerce is a modern backend for an online store, built using **Node.js**, *
 
 ---
 
+## 🧪 API Testing with Postman
+
+You can explore and test the API using the Postman collection below:
+
+- [View Online (Public Link)](https://www.postman.com/kessena11/workspace/my-workspace/collection/27978422-4eebab18-1021-4aba-b491-6e50c6ac92c9?action=share&creator=27978422&active-environment=27978422-abf298c1-9b83-4973-a61b-8374e3921aab)
+- [Download JSON Collection](./postman/e_commerce.postman_collection.json)
+
+Import this collection into Postman and start testing the endpoints right away.
+
+
 ## 📦 REST API Highlights
 
 | Method | Endpoint                              | Description                        |
