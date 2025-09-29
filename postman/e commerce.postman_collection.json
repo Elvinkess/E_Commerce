@@ -1,0 +1,674 @@
+{
+	"info": {
+		"_postman_id": "4eebab18-1021-4aba-b491-6e50c6ac92c9",
+		"name": "e commerce",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "27978422",
+		"_collection_link": "https://www.postman.com/workspace/My-Workspace~7d09ff56-292c-461a-8600-49ff9f4a1d6d/collection/27978422-4eebab18-1021-4aba-b491-6e50c6ac92c9?action=share&source=collection_link&creator=27978422"
+	},
+	"item": [
+		{
+			"name": "get products",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://e-commerce-as1q.onrender.com/product",
+					"protocol": "https",
+					"host": [
+						"e-commerce-as1q",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"product"
+					]
+				},
+				"description": "## API Endpoint: Get Products\n\n### Purpose\n\nThis endpoint retrieves a list of products available in the e-commerce platform. It provides detailed information about each product, including its pricing, category, inventory status, and associated images.\n\n### Request Format\n\n- **Method**: GET\n    \n- **URL**: `https://e-commerce-as1q.onrender.com/product`\n    \n- **Request Body**: No request body is required for this endpoint.\n    \n\n### Response Structure\n\nUpon a successful request, the server responds with a JSON array containing product objects. Each product object includes the following fields:\n\n- **id**: (integer) Unique identifier for the product.\n    \n- **name**: (string) Name of the product.\n    \n- **price**: (number) Price of the product.\n    \n- **category_id**: (integer) Identifier for the category to which the product belongs.\n    \n- **inventory_id**: (integer) Identifier for the inventory associated with the product.\n    \n- **image_url**: (string) URL of the product image.\n    \n- **category**: (object) Contains details about the category:\n    \n    - **products**: (array) List of products in the category (empty array if none).\n        \n    - **id**: (integer) Unique identifier for the category.\n        \n    - **name**: (string) Name of the category.\n        \n    - **description**: (string) Description of the category.\n        \n- **inventory**: (object) Contains inventory details:\n    \n    - **id**: (integer) Unique identifier for the inventory.\n        \n    - **quantity_available**: (integer) Number of items available in stock.\n        \n    - **quantity_sold**: (integer) Number of items sold.\n        \n    - **product_id**: (integer) Identifier for the associated product.\n        \n- **outOfStock**: (boolean) Indicates whether the product is out of stock.\n    \n\n### Example Response\n\n``` json\n[\n  {\n    \"id\": 0,\n    \"name\": \"\",\n    \"price\": 0,\n    \"category_id\": 0,\n    \"inventory_id\": 0,\n    \"image_url\": \"\",\n    \"category\": {\n      \"products\": [],\n      \"id\": 0,\n      \"name\": \"\",\n      \"description\": \"\"\n    },\n    \"inventory\": {\n      \"id\": 0,\n      \"quantity_available\": 0,\n      \"quantity_sold\": 0,\n      \"product_id\": 0\n    },\n    \"outOfStock\": true\n  }\n]\n\n ```\n\nThis response structure allows clients to easily access and display product information in their applications."
+			},
+			"response": []
+		},
+		{
+			"name": "create user",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"JohnDoe@gmail.com\",\n    \"username\": \"Doe\",\n    \"password\": \"123456\",\n    \"role\":\"admin\" \n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://e-commerce-as1q.onrender.com/user/",
+					"protocol": "https",
+					"host": [
+						"e-commerce-as1q",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"user",
+						""
+					]
+				},
+				"description": "## Create User\n\nThis endpoint allows you to create a new user in the system. You will need to provide the user's details in the request body.\n\n### Request\n\n- **Method:** POST\n    \n- **URL:** `https://e-commerce-as1q.onrender.com/user/`\n    \n\n#### Request Body\n\nThe request body must be in JSON format and include the following parameters:\n\n- `email` (string): The email address of the user. This should be a valid email format.\n    \n- `username` (string): The desired username for the user account.\n    \n- `password` (string): The password for the user account. Ensure that it meets any security requirements.\n    \n- `role` (string): The role assigned to the user (e.g., \"admin\", default \"user\" role if no role is provided).\n    \n\n**Example Request Body:**\n\n``` json\n{\n  \"email\": \"example@example.com\",\n  \"username\": \"exampleUser\",\n  \"password\": \"securePassword123\",\n  \"role\": \"admin\"\n}\n\n ```\n\n### Response\n\nUpon a successful request, the server will respond with a status code of `200` and a JSON object containing the following fields:\n\n- `email` (string): The email address of the created user (returned as empty string).\n    \n- `username` (string): The username of the created user (returned as empty string).\n    \n- `password` (string): The password of the created user (returned as empty string).\n    \n- `role` (string): The role assigned to the created user (returned as empty string).\n    \n- `id` (integer): A unique identifier for the newly created user (returned as 0).\n    \n\n**Example Response:**\n\n``` json\n{\n  \"email\": \"\",\n  \"username\": \"\",\n  \"password\": \"\",\n  \"role\": \"\",\n  \"id\": 0\n}\n\n ```\n\n### Notes\n\n- Ensure that all required fields are included in the request body to avoid validation errors.\n    \n- The response will not return the actual user details for security reasons."
+			},
+			"response": []
+		},
+		{
+			"name": "sign in",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"JohnDoe@gmail.com\",\n    \"password\": \"123456\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://e-commerce-as1q.onrender.com/user/signin",
+					"protocol": "https",
+					"host": [
+						"e-commerce-as1q",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"user",
+						"signin"
+					]
+				},
+				"description": "## Sign In User\n\nThis endpoint allows users to sign in to their account on the e-commerce platform. It requires the user's email and password to authenticate and return user details upon successful login.\n\n### Request\n\n- **Method**: POST\n    \n- **URL**: `https://e-commerce-as1q.onrender.com/user/signin`\n    \n\n#### Request Body\n\nThe request body must be in JSON format and should include the following parameters:\n\n- `email` (string): The email address associated with the user's account.\n    \n- `password` (string): The password for the user's account.\n    \n\n**Example Request Body:**\n\n``` json\n{\n  \"email\": \"user@example.com\",\n  \"password\": \"your_password\"\n}\n\n ```\n\n### Response\n\nOn a successful sign-in, the server responds with a status code of `200` and a JSON object containing the following structure:\n\n- `message` (string): A message indicating the result of the sign-in attempt (may be empty).\n    \n- `user` (object): An object containing user information:\n    \n    - `email` (string): The email of the signed-in user.\n        \n    - `username` (string): The username of the signed-in user.\n        \n    - `id` (integer): The unique identifier for the user.\n        \n\n**Example Response:**\n\n``` json\n{\n  \"message\": \"\",\n  \"user\": {\n    \"email\": \"user@example.com\",\n    \"username\": \"username\",\n    \"id\": 1\n  }\n}\n\n ```\n\n### Notes\n\n- Ensure that the email and password are correct to successfully authenticate.\n    \n- The response will include user details only if the sign-in is successful."
+			},
+			"response": []
+		},
+		{
+			"name": "create product with image",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "data",
+							"value": "{ \"name\": \"Fly Gown\", \"price\": 18000.00, \"category_name\": \"BUBU\", \"quantity_available\": 160 }",
+							"type": "text"
+						},
+						{
+							"key": "image",
+							"type": "file",
+							"src": "postman-cloud:///1f09bd21-697a-4600-b0d7-4b94d9ec2c35"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://e-commerce-as1q.onrender.com/product/product-with-image",
+					"protocol": "https",
+					"host": [
+						"e-commerce-as1q",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"product",
+						"product-with-image"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Product search",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"catName\": \"\",\n\"productName\": \"k\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://e-commerce-as1q.onrender.com/product/search",
+					"protocol": "https",
+					"host": [
+						"e-commerce-as1q",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"product",
+						"search"
+					]
+				},
+				"description": "## Endpoint Description\n\nThis endpoint allows users to search for products within the e-commerce platform based on specified criteria. By sending a POST request to the `/product/search` endpoint, users can filter products by category name and product name.\n\n### Request\n\nThe request body should be in JSON format and includes the following parameters:\n\n- **catName** (string): The name of the category to filter products. This parameter can be left empty to search across all categories.\n    \n- **productName** (string): The name of the product to search for. This parameter is used to find products that match the specified name.\n    \n\n**Example Request Body:**\n\n``` json\n{\n  \"catName\": \"\",\n  \"productName\": \"k\"\n}\n\n ```\n\n### Response\n\nUpon a successful request, the server will respond with a JSON array containing the details of the products that match the search criteria. The structure of each product object in the response includes:\n\n- **id** (integer): The unique identifier for the product.\n    \n- **name** (string): The name of the product.\n    \n- **price** (number): The price of the product.\n    \n- **category_id** (integer): The identifier for the product's category.\n    \n- **inventory_id** (integer): The identifier for the product's inventory.\n    \n- **image_url** (string): The URL of the product's image.\n    \n- **category** (object): An object containing details about the product's category, including:\n    \n    - **products** (array): An array of products in the category.\n        \n    - **id** (integer): The unique identifier for the category.\n        \n    - **name** (string): The name of the category.\n        \n    - **description** (string): A description of the category.\n        \n- **inventory** (object): An object containing inventory details, including:\n    \n    - **id** (integer): The unique identifier for the inventory.\n        \n    - **quantity_available** (integer): The number of items available.\n        \n    - **quantity_sold** (integer): The number of items sold.\n        \n    - **product_id** (integer): The identifier for the associated product.\n        \n- **outOfStock** (boolean): A flag indicating whether the product is out of stock.\n    \n\n**Example Response:**\n\n``` json\n[\n  {\n    \"id\": 0,\n    \"name\": \"\",\n    \"price\": 0,\n    \"category_id\": 0,\n    \"inventory_id\": 0,\n    \"image_url\": \"\",\n    \"category\": {\n      \"products\": [],\n      \"id\": 0,\n      \"name\": \"\",\n      \"description\": \"\"\n    },\n    \"inventory\": {\n      \"id\": 0,\n      \"quantity_available\": 0,\n      \"quantity_sold\": 0,\n      \"product_id\": 0\n    },\n    \"outOfStock\": true\n  }\n]\n\n ```"
+			},
+			"response": []
+		},
+		{
+			"name": "get guest cart",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://e-commerce-as1q.onrender.com/cart/getcart/?guestId=ef7fae49-2cd3-4e3a-aa64-fea6a2b01368",
+					"protocol": "https",
+					"host": [
+						"e-commerce-as1q",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"cart",
+						"getcart",
+						""
+					],
+					"query": [
+						{
+							"key": "guestId",
+							"value": "ef7fae49-2cd3-4e3a-aa64-fea6a2b01368"
+						}
+					]
+				},
+				"description": "## Get Cart\n\nThis endpoint retrieves the shopping cart details for a specific guest user identified by their unique `guestId`.\n\n### Request Parameters\n\n- **guestId** (string): A unique identifier for the guest user. This parameter is required to fetch the corresponding cart details.\n    \n\n### Response Structure\n\nOn a successful request, the response will return a JSON object containing the following fields:\n\n- **id** (integer): The unique identifier for the cart.\n    \n- **user_id** (integer or null): The ID of the user associated with the cart, if applicable.\n    \n- **guest_id** (string): The unique identifier for the guest user.\n    \n- **cart_item_ids** (array): An array of IDs representing the items in the cart.\n    \n- **user_status** (string): The status of the user (if applicable).\n    \n- **cart_items** (array): An array of items currently in the cart, where each item includes:\n    \n    - **id** (integer): The unique identifier for the cart item.\n        \n    - **cart_id** (integer): The ID of the cart to which the item belongs.\n        \n    - **product_id** (integer): The ID of the product.\n        \n    - **purchased_price** (number): The price at which the product was purchased.\n        \n    - **quantity** (integer): The quantity of the product in the cart.\n        \n    - **product** (object): An object containing details about the product, including:\n        \n        - **id** (integer): The unique identifier for the product.\n            \n        - **name** (string): The name of the product.\n            \n        - **price** (number): The price of the product.\n            \n        - **category_id** (integer): The ID of the category to which the product belongs.\n            \n        - **inventory_id** (integer): The ID of the inventory record for the product.\n            \n        - **image_url** (string): The URL of the product image.\n            \n        - **category** (object): An object containing category details, including:\n            \n            - **products** (array): An array of products in the category.\n                \n            - **id** (integer): The unique identifier for the category.\n                \n            - **name** (string): The name of the category.\n                \n            - **description** (string): A description of the category.\n                \n        - **inventory** (object): An object containing inventory details, including:\n            \n            - **id** (integer): The unique identifier for the inventory.\n                \n            - **quantity_available** (integer): The number of items available in inventory.\n                \n            - **quantity_sold** (integer): The number of items sold.\n                \n            - **product_id** (integer): The ID of the product associated with the inventory.\n                \n        - **outOfStock** (boolean): Indicates whether the product is out of stock.\n            \n    - **status** (string): The status of the cart item.\n        \n\n### Notes\n\n- Ensure that the `guestId` provided is valid and corresponds to an existing cart to receive a successful response.\n    \n- The response will have a status code of `200` on success, indicating that the cart details were retrieved successfully."
+			},
+			"response": []
+		},
+		{
+			"name": "add item to cart",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"user_id\":null,\n    \"guest_id\":\"ef7fae49-2cd3-4e3a-aa64-fea6a2b01368\",\n    \"product_id\":10,\n    \"quantity\":1\n    \n    \n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://e-commerce-as1q.onrender.com/cart/addItem",
+					"protocol": "https",
+					"host": [
+						"e-commerce-as1q",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"cart",
+						"addItem"
+					]
+				},
+				"description": "### Add Item to Cart\n\nThis endpoint allows users to add an item to their shopping cart. It requires the identification of the user or guest, as well as details about the product being added and the desired quantity. Either of the user_id or guest_id can be null but both cannot be null.\n\n#### Request\n\n- **Method**: POST\n    \n- **URL**: `https://e-commerce-as1q.onrender.com/cart/addItem`\n    \n- **Content-Type**: application/json\n    \n\n##### Request Body Parameters:\n\n- `user_id` (integer): The unique identifier of the user adding the item to the cart. This is required for registered users.\n    \n- `guest_id` (integer or null): The unique identifier for guests. This can be null if the user is registered.\n    \n- `product_id` (integer): The unique identifier of the product to be added to the cart.\n    \n- `quantity` (integer): The number of units of the product to be added.\n    \n\n##### Example Request Body:\n\n``` json\n{\n  \"user_id\": 2,\n  \"guest_id\": null,\n  \"product_id\": 10,\n  \"quantity\": 1\n}\n\n ```\n\n#### Response\n\n- **Status Code**: 200\n    \n- **Content-Type**: application/json\n    \n\n##### Response Structure:\n\n- `message` (string): A message indicating the status of the request (may be empty).\n    \n- `data` (object): Contains the details of the cart after the item has been added.\n    \n    - `id` (integer): The unique identifier for the cart.\n        \n    - `user_id` (integer): The ID of the user associated with the cart.\n        \n    - `guest_id` (integer or null): The ID of the guest associated with the cart, if applicable.\n        \n    - `cart_item_ids` (array): An array of IDs representing items in the cart.\n        \n    - `user_status` (string): The status of the user (e.g., active, inactive).\n        \n    - `cart_items` (array): An array of items currently in the cart, each containing:\n        \n        - `id` (integer): The unique identifier for the cart item.\n            \n        - `cart_id` (integer): The ID of the cart.\n            \n        - `product_id` (integer): The ID of the product.\n            \n        - `purchased_price` (number): The price at which the product was added to the cart.\n            \n        - `quantity` (integer): The quantity of the product in the cart.\n            \n        - `product` (object): Details of the product being added, including:\n            \n            - `id` (integer): The unique identifier for the product.\n                \n            - `name` (string): The name of the product.\n                \n            - `price` (number): The price of the product.\n                \n            - `category_id` (integer): The ID of the product's category.\n                \n            - `inventory_id` (integer): The ID of the product's inventory.\n                \n            - `image_url` (string): The URL of the product's image.\n                \n            - `category` (object): Information about the product's category.\n                \n            - `inventory` (object): Information about the product's inventory.\n                \n            - `outOfStock` (boolean): Indicates if the product is out of stock.\n                \n        - `status` (string): The status of the cart item.\n            \n\n##### Example Response:\n\n``` json\n{\n  \"message\": \"\",\n  \"data\": {\n    \"id\": 0,\n    \"user_id\": 0,\n    \"guest_id\": null,\n    \"cart_item_ids\": [],\n    \"user_status\": \"\",\n    \"cart_items\": [\n      {\n        \"id\": 0,\n        \"cart_id\": 0,\n        \"product_id\": 0,\n        \"purchased_price\": 0,\n        \"quantity\": 0,\n        \"product\": {\n          \"id\": 0,\n          \"name\": \"\",\n          \"price\": 0,\n          \"category_id\": 0,\n          \"inventory_id\": 0,\n          \"image_url\": \"\",\n          \"category\": {\n            \"products\": [],\n            \"id\": 0,\n            \"name\": \"\",\n            \"description\": \"\"\n          },\n          \"inventory\": {\n            \"id\": 0,\n            \"quantity_available\": 0,\n            \"quantity_sold\": 0,\n            \"product_id\": 0\n          },\n          \"outOfStock\": true\n        },\n        \"status\": \"\"\n      }\n    ]\n  }\n}\n\n ```"
+			},
+			"response": []
+		},
+		{
+			"name": "get cart users",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"user_id\":2,\n    \"guest_id\":null,\n    \"product_id\":10,\n    \"quantity\":1\n    \n    \n}"
+				},
+				"url": {
+					"raw": "https://e-commerce-as1q.onrender.com/cart/getcart/?userId=2",
+					"protocol": "https",
+					"host": [
+						"e-commerce-as1q",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"cart",
+						"getcart",
+						""
+					],
+					"query": [
+						{
+							"key": "userId",
+							"value": "2"
+						}
+					]
+				},
+				"description": "## Get Cart Details\n\nThis endpoint retrieves the cart details for a specific user based on their user ID. It is useful for checking the current items in the user's cart, including product information and quantities.\n\n### Request\n\n- **Method**: GET\n    \n- **URL**: `https://e-commerce-as1q.onrender.com/cart/getcart/`\n    \n- **Query Parameters**:\n    \n    - `userId` (required, integer): The unique identifier of the user whose cart details are being requested.\n        \n\n### Example Request\n\n``` http\nGET https://e-commerce-as1q.onrender.com/cart/getcart/?userId=2\n\n ```\n\n### Response\n\n- **Status Code**: 200 OK\n    \n- **Content-Type**: application/json\n    \n- {\"id\": 0,\"user_id\": 0,\"guest_id\": null,\"cart_item_ids\": \\[\\],\"user_status\": \"\",\"cart_items\": \\[ { \"id\": 0, \"cart_id\": 0, \"product_id\": 0, \"purchased_price\": 0, \"quantity\": 0, \"product\": { \"id\": 0, \"name\": \"\", \"price\": 0, \"category_id\": 0, \"inventory_id\": 0, \"image_url\": \"\", \"category\": { \"products\": \\[\\], \"id\": 0, \"name\": \"\", \"description\": \"\" }, \"inventory\": { \"id\": 0, \"quantity_available\": 0, \"quantity_sold\": 0, \"product_id\": 0 }, \"outOfStock\": true }, \"status\": \"\" }\\]}\n    \n\n### Notes\n\n- The response contains an array of `cart_items`, each representing a product in the user's cart.\n    \n- Each `cart_item` includes details about the product, such as its ID, name, price, and stock status.\n    \n- If the user is a guest, the `guest_id` will be returned as null.\n    \n- Ensure that the `userId` provided in the request is valid to receive the correct cart information."
+			},
+			"response": []
+		},
+		{
+			"name": "remove guest cart item",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"guestId\":\"12\"\n}"
+				},
+				"url": {
+					"raw": "https://e-commerce-as1q.onrender.com/cart/guest/item/38",
+					"protocol": "https",
+					"host": [
+						"e-commerce-as1q",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"cart",
+						"guest",
+						"item",
+						"38"
+					],
+					"query": [
+						{
+							"key": "guestId",
+							"value": "ef7fae49-2cd3-4e3a-aa64-fea6a2b01368",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get category",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://e-commerce-as1q.onrender.com/categories",
+					"protocol": "https",
+					"host": [
+						"e-commerce-as1q",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"categories"
+					]
+				},
+				"description": "# Get Categories\n\nThis endpoint retrieves a list of product categories from the e-commerce platform.\n\n## Request\n\n- **Method**: GET\n    \n- **URL**: `https://e-commerce-as1q.onrender.com/categories`\n    \n\n## Response\n\nUpon a successful request, the server will respond with a `200 OK` status and a JSON array containing category objects. Each category object includes the following fields:\n\n- `id`: A unique identifier for the category.\n    \n- `name`: The name of the category.\n    \n- `description`: A brief description of the category.\n    \n- `products`: An array of products associated with the category (currently empty in the response).\n    \n\n### Example Response\n\n``` json\n[\n    {\n        \"products\": [],\n        \"id\": 0,\n        \"name\": \"\",\n        \"description\": \"\"\n    }\n]\n\n ```\n\n## Notes\n\n- The response may contain empty fields for `name`, `description`, and an empty `products` array, indicating that there are currently no products listed under the categories.\n    \n- This endpoint is useful for populating category listings in the e-commerce application."
+			},
+			"response": []
+		},
+		{
+			"name": "create category",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkRvZSIsImVtYWlsIjoiSm9obkRvZUBnbWFpbC5jb20iLCJpZCI6Miwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzU5MDU2ODQ2LCJleHAiOjE3NTkyNzI4NDZ9.4OQ3z3_ppxwW7uKY9n9YBXz6FDlmVtnL7rej08Jxo_8\n",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\":\"Electronics and gadgets\",\n    \"description\": \"Best groceries\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://e-commerce-as1q.onrender.com/categories",
+					"protocol": "https",
+					"host": [
+						"e-commerce-as1q",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"categories"
+					]
+				},
+				"description": "### Add Category\n\nThis endpoint allows users to create a new category in the e-commerce platform. By sending a POST request to the `/categories` endpoint, users can add a category with a specified name and description.\n\n#### Request\n\n- **Method**: POST\n    \n- **URL**: `https://e-commerce-as1q.onrender.com/categories`\n    \n- **Content-Type**: application/json\n    \n\n##### Request Body Parameters\n\nThe request body should be a JSON object containing the following fields:\n\n- `name` (string): The name of the category you want to create. This should be a descriptive title that represents the category (e.g., \"Electronics and gadgets\").\n    \n- `description` (string): A brief description of the category. This helps in providing additional context about the category (e.g., \"Best groceries\").\n    \n\n**Example Request Body:**\n\n``` json\n{\n  \"name\": \"Electronics and gadgets\",\n  \"description\": \"Best groceries\"\n}\n\n ```\n\n#### Response\n\nUpon successful creation of the category, the server will respond with a JSON object containing the following fields:\n\n- `name` (string): The name of the newly created category.\n    \n- `description` (string): The description of the newly created category.\n    \n- `id` (integer): A unique identifier for the newly created category.\n    \n\n**Example Response:**\n\n``` json\n{\n  \"name\": \"\",\n  \"description\": \"\",\n  \"id\": 0\n}\n\n ```\n\n#### Status Codes\n\n- **200 OK**: The category was successfully created.\n    \n- Other status codes may be returned in case of errors, such as validation issues or server errors.\n    \n\nThis endpoint is essential for managing categories in the e-commerce system, allowing for better organization and navigation of products."
+			},
+			"response": []
+		},
+		{
+			"name": "remove guest cart",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\":\"Electronics and gadgets\",\n    \"description\": \"Best groceries\"\n}"
+				},
+				"url": {
+					"raw": "https://e-commerce-as1q.onrender.com/cart/clear/guest?guestId=ef7fae49-2cd3-4e3a-aa64-fea6a2b01368",
+					"protocol": "https",
+					"host": [
+						"e-commerce-as1q",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"cart",
+						"clear",
+						"guest"
+					],
+					"query": [
+						{
+							"key": "guestId",
+							"value": "ef7fae49-2cd3-4e3a-aa64-fea6a2b01368"
+						}
+					]
+				},
+				"description": "## Clear Guest Cart\n\nThis endpoint allows you to clear the shopping cart for a guest user identified by a unique `guestId`. It is particularly useful for resetting the cart contents without affecting other users' carts.\n\n### Request Details\n\n- **Method**: DELETE\n    \n- **URL**: `https://e-commerce-as1q.onrender.com/cart/clear/guest?guestId={guestId}`\n    \n\n#### Query Parameters\n\n- `guestId` (string, required): The unique identifier for the guest user whose cart is to be cleared.\n    \n\n### Request Body\n\nThe request body should be in JSON format and can include the following parameters:\n\n- `name` (string, optional): A descriptive name for the cart.\n    \n- `description` (string, optional): A detailed description of the cart's contents.\n    \n\nExample request body:\n\n``` json\n{\n  \"name\": \"Electronics and gadgets\",\n  \"description\": \"Best groceries\"\n}\n\n ```\n\n### Response Details\n\nUpon successful execution, the server will respond with a status code of `200` and the deletd cart in JSON object containing the following fields:\n\n- `id` (integer): The identifier for the cart.\n    \n- `user_id` (string or null): The ID of the user (if applicable).\n    \n- `guest_id` (string): The ID of the guest user.\n    \n- `cart_item_ids` (array): A list of item IDs that were in the cart (should be empty after clearing).\n    \n- `user_status` (string): The status of the user (if applicable).\n    \n\nExample response:\n\n``` json\n{\n  \"id\": 0,\n  \"user_id\": null,\n  \"guest_id\": \"\",\n  \"cart_item_ids\": [],\n  \"user_status\": \"\"\n}\n\n ```\n\n### Notes\n\n- Ensure that the `guestId` parameter is valid and corresponds to an existing guest session.\n    \n- This action is irreversible; once the cart is cleared, all items will be removed."
+			},
+			"response": []
+		},
+		{
+			"name": "remove user cart",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkRvZSIsImVtYWlsIjoiSm9obkRvZUBnbWFpbC5jb20iLCJpZCI6Miwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzU5MDU2ODQ2LCJleHAiOjE3NTkyNzI4NDZ9.4OQ3z3_ppxwW7uKY9n9YBXz6FDlmVtnL7rej08Jxo_8\n",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\":\"Electronics and gadgets\",\n    \"description\": \"Best groceries\"\n}"
+				},
+				"url": {
+					"raw": "https://e-commerce-as1q.onrender.com/cart/clear/guest?guestId=123",
+					"protocol": "https",
+					"host": [
+						"e-commerce-as1q",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"cart",
+						"clear",
+						"guest"
+					],
+					"query": [
+						{
+							"key": "guestId",
+							"value": "123"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update cart item guest",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"guestId\":\"ef7fae49-2cd3-4e3a-aa64-fea6a2b01368\",\n    \"quantity\":3\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://e-commerce-as1q.onrender.com/cart/guest/item/{{productId}}",
+					"protocol": "https",
+					"host": [
+						"e-commerce-as1q",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"cart",
+						"guest",
+						"item",
+						"{{productId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update cart item user",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"guestId\":\"ef7fae49-2cd3-4e3a-aa64-fea6a2b01368\",\n    \"quantity\":3\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://e-commerce-as1q.onrender.com/cart/guest/item/{{productId}}",
+					"protocol": "https",
+					"host": [
+						"e-commerce-as1q",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"cart",
+						"guest",
+						"item",
+						"{{productId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "merge user and guest cart",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://e-commerce-as1q.onrender.com/cart/merge/?guestId=ef7fae49-2cd3-4e3a-aa64-fea6a2b01368",
+					"protocol": "https",
+					"host": [
+						"e-commerce-as1q",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"cart",
+						"merge",
+						""
+					],
+					"query": [
+						{
+							"key": "guestId",
+							"value": "ef7fae49-2cd3-4e3a-aa64-fea6a2b01368"
+						}
+					]
+				},
+				"description": "## Merge Cart Endpoint\n\nThis endpoint merges a guest cart with a user cart based on the provided guest ID. It allows for the consolidation of cart items into a single user account, facilitating a seamless shopping experience.\n\n### Request\n\n- **Method**: GET\n    \n- **URL**: `https://e-commerce-as1q.onrender.com/cart/merge/`\n    \n- **Query Parameters**:\n    \n    - `guestId` (string): The unique identifier for the guest's cart that needs to be merged. This parameter is required.\n        \n\n### Response\n\n- **Status Code**: 200 OK\n    \n- **Content-Type**: application/json\n    \n- **Response Body**:\n    \n    - `id` (integer): The ID of the merged cart.\n        \n    - `user_id` (integer): The ID of the user associated with the cart.\n        \n    - `guest_id` (string|null): The ID of the guest, which may be null after merging.\n        \n    - `cart_item_ids` (array): An array containing the IDs of the items in the cart.\n        \n    - `user_status` (string): The status of the user account.\n        \n    - `cart_items` (array): A list of items in the cart, where each item includes:\n        \n        - `id` (integer): The ID of the cart item.\n            \n        - `cart_id` (integer): The ID of the cart to which the item belongs.\n            \n        - `product_id` (integer): The ID of the product.\n            \n        - `purchased_price` (number): The price at which the product was purchased.\n            \n        - `quantity` (integer): The quantity of the product in the cart.\n            \n        - `product` (object): Details of the product, including:\n            \n            - `id` (integer): The product ID.\n                \n            - `name` (string): The name of the product.\n                \n            - `price` (number): The price of the product.\n                \n            - `category_id` (integer): The ID of the product category.\n                \n            - `inventory_id` (integer): The ID of the inventory record.\n                \n            - `image_url` (string): The URL of the product image.\n                \n            - `category` (object): Details about the product category, including:\n                \n                - `products` (array): An array of products in the category.\n                    \n                - `id` (integer): The category ID.\n                    \n                - `name` (string): The name of the category.\n                    \n                - `description` (string): A description of the category.\n                    \n            - `inventory` (object): Details about the product inventory, including:\n                \n                - `id` (integer): The inventory ID.\n                    \n                - `quantity_available` (integer): The number of items available in stock.\n                    \n                - `quantity_sold` (integer): The number of items sold.\n                    \n                - `product_id` (integer): The ID of the product associated with the inventory.\n                    \n            - `outOfStock` (boolean): Indicates whether the product is out of stock.\n                \n        - `status` (string): The status of the cart item.\n            \n\n### Notes\n\n- Ensure that the `guestId` provided is valid and corresponds to an existing guest cart.\n    \n- The response will contain the merged cart details, including any items that were successfully merged from the guest cart."
+			},
+			"response": []
+		},
+		{
+			"name": "add address",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n   \"name\":\"guest user\",\n    \"email\":\"Guestmail@gmail.com\",\n    \"phone\":\"08106431932\",\n    \"address\":\"24 Olanrewaju Street, Yaba, Lagos State, Nigeria\",\n    \"user_id\":null,\n    \"guest_id\":\"ef7fae49-2cd3-4e3a-aa64-fea6a2b01368\"\n} ",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://e-commerce-as1q.onrender.com/address",
+					"protocol": "https",
+					"host": [
+						"e-commerce-as1q",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"address"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get/create Order guest",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n   \"name\":\"guest user\",\n    \"email\":\"Guestmail@gmail.com\",\n    \"phone\":\"08106431932\",\n    \"address\":\"24 Olanrewaju Street, Yaba, Lagos State, Nigeria\",\n    \"user_id\":null,\n    \"guest_id\":\"ef7fae49-2cd3-4e3a-aa64-fea6a2b01368\"\n} "
+				},
+				"url": {
+					"raw": "https://e-commerce-as1q.onrender.com/order/?guestId=ef7fae49-2cd3-4e3a-aa64-fea6a2b01368",
+					"protocol": "https",
+					"host": [
+						"e-commerce-as1q",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"order",
+						""
+					],
+					"query": [
+						{
+							"key": "guestId",
+							"value": "ef7fae49-2cd3-4e3a-aa64-fea6a2b01368"
+						}
+					]
+				},
+				"description": "### Add Order\n\nThis endpoint allows users to create a new order in the e-commerce system. It accepts a POST request containing order details, including guest information and order specifics.\n\n#### Request\n\n- **Method:** POST\n    \n- **Endpoint:** `https://e-commerce-as1q.onrender.com/order/?guestId={guestId}`\n    \n- **Query Parameters:**\n    \n    - `guestId` (string): A unique identifier for the guest user placing the order.\n        \n- **Request Body:**  \n    The request body must be in JSON format and include the following parameters:\n    \n    - `name` (string): The name of the guest user.\n        \n    - `email` (string): The email address of the guest user.\n        \n    - `phone` (string): The phone number of the guest user.\n        \n    - `address` (string): The shipping address for the order.\n        \n    - `user_id` (string or null): The ID of the user if they are logged in; otherwise, it should be null.\n        \n    - `guest_id` (string): The unique identifier for the guest user.\n        \n\n#### Response\n\n- **Status Code:** 200 OK\n    \n- **Content-Type:** application/json\n    \n- **Response Body:**  \n    The response will return a JSON object with the following fields:\n    \n    - `id` (integer): The unique identifier for the created order.\n        \n    - `user_id` (string or null): The ID of the user associated with the order, if applicable.\n        \n    - `guest_id` (string): The unique identifier for the guest user.\n        \n    - `total_price` (number): The total price of the order.\n        \n    - `status` (string): The current status of the order.\n        \n    - `created_at` (string or null): The timestamp of when the order was created.\n        \n    - `Order_items` (array): An array of items included in the order, where each item contains:\n        \n        - `id` (integer): The unique identifier for the order item.\n            \n        - `order_id` (integer): The ID of the order this item belongs to.\n            \n        - `product_id` (integer): The unique identifier for the product.\n            \n        - `product_name` (string): The name of the product.\n            \n        - `quantity` (integer): The quantity of the product ordered.\n            \n        - `price` (number): The price of the product.\n            \n        - `created_at` (string): The timestamp of when the order item was created.\n            \n        - `message` (string): Any additional message related to the order item.\n            \n\nThis endpoint is essential for processing orders placed by guest users, enabling a seamless shopping experience."
+			},
+			"response": []
+		},
+		{
+			"name": "get/create Order user",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "make payment",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\":\"me@gmail.com\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://e-commerce-as1q.onrender.com/order/pay/{{orderId}}/payment",
+					"protocol": "https",
+					"host": [
+						"e-commerce-as1q",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"order",
+						"pay",
+						"{{orderId}}",
+						"payment"
+					]
+				},
+				"description": "## Endpoint Description\n\nThis endpoint is used to process a payment for a specific order identified by `orderId`. It allows users to submit their payment information and receive confirmation of the transaction.\n\n### Request\n\n- **Method**: POST\n    \n- **URL**: `https://e-commerce-as1q.onrender.com/order/pay/{{orderId}}/payment`\n    \n\n#### Request Body\n\nThe request should include the following JSON payload:\n\n- **email** (string): The email address of the user making the payment or if the user have an account this can be neglected.\n    \n\n### Response\n\nUpon a successful payment processing, the API will return a JSON response with the following structure:\n\n- **id** (integer): The unique identifier for the payment transaction.\n    \n- **amount** (integer): The total amount of the transaction.\n    \n- **status** (string): The current status of the payment (e.g., success, pending).\n    \n- **orderId** (integer): The identifier of the order associated with this payment.\n    \n- **userEmail** (string): The email address of the user who made the payment.\n    \n- **date** (string): The date and time when the payment was processed.\n    \n- **processorReference** (string): A reference provided by the payment processor.\n    \n- **transactionReference** (string): A unique reference for the transaction.\n    \n- **remarks** (string): Any additional remarks regarding the transaction.\n    \n- **deliveryamount** (integer): The amount associated with delivery, if applicable.\n    \n- **redirectUrl** (string): A URL to which the user may be redirected after the payment process.\n    \n\n### Status Codes\n\n- **200 OK**: Payment processed successfully.\n    \n- Other status codes may indicate errors or issues with the payment processing.\n    \n\nEnsure that the email provided is valid and associated with the user making the payment to avoid any issues during the transaction."
+			},
+			"response": []
+		},
+		{
+			"name": "confirm payment",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://e-commerce-as1q.onrender.com/order/confirmpayment?tx_ref=iyvnaqjcfvutowo",
+					"protocol": "https",
+					"host": [
+						"e-commerce-as1q",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"order",
+						"confirmpayment"
+					],
+					"query": [
+						{
+							"key": "tx_ref",
+							"value": "iyvnaqjcfvutowo"
+						}
+					]
+				},
+				"description": "## Confirm Payment Endpoint\n\nThis endpoint is used to confirm a payment for an order based on a transaction reference. It allows clients to verify the status of a payment using the provided transaction reference.\n\n### Request\n\n- **Method:** GET\n    \n- **URL:** `https://e-commerce-as1q.onrender.com/order/confirmpayment`\n    \n- **Query Parameters:**\n    \n    - `tx_ref` (string, required): The transaction reference for the payment that needs to be confirmed. This unique identifier is essential for retrieving the payment status.\n        \n\n### Response\n\n- **Content-Type:** application/json\n    \n- **Status Codes:**\n    \n    - **200 OK:** Indicates that the payment confirmation was successful. The response body will contain the details of the confirmed payment.\n        \n    - **400 Bad Request:** Indicates that the request was invalid. The response will contain an error message, which in this case is an empty string, suggesting that further details about the error may not be provided.\n        \n\n### Notes\n\n- Ensure that the `tx_ref` parameter is correctly formatted and corresponds to a valid transaction to avoid receiving a 400 status code.\n    \n- The response format is JSON, and clients should be prepared to handle both successful and error responses accordingly."
+			},
+			"response": []
+		},
+		{
+			"name": "get paginated",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://e-commerce-as1q.onrender.com/product/paginate?page=2&limit=5",
+					"protocol": "https",
+					"host": [
+						"e-commerce-as1q",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"product",
+						"paginate"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "2"
+						},
+						{
+							"key": "limit",
+							"value": "5"
+						}
+					]
+				},
+				"description": "## API Endpoint: Paginate Products\n\n### Method\n\n`GET`\n\n### Endpoint\n\n`https://e-commerce-as1q.onrender.com/product/paginate`\n\n### Parameters\n\n- **page** (query parameter): Specifies the page number of the product list to retrieve.\n    \n- **limit** (query parameter): Indicates the maximum number of products to return per page.\n    \n\n### Description\n\nThis endpoint retrieves a paginated list of products from the e-commerce platform. By specifying the `page` and `limit` parameters, users can control which subset of products they want to access.\n\n### Expected Response Format\n\nOn a successful request, the API returns a JSON object containing:\n\n- **products**: An array of product objects, where each product includes:\n    \n    - `id`: Unique identifier for the product.\n        \n    - `name`: The name of the product.\n        \n    - `price`: The price of the product.\n        \n    - `category_id`: Identifier for the category the product belongs to.\n        \n    - `inventory_id`: Identifier for the inventory associated with the product.\n        \n    - `image_url`: URL of the product image.\n        \n    - `category`: An object containing details about the product's category, including:\n        \n        - `id`: Unique identifier for the category.\n            \n        - `name`: The name of the category.\n            \n        - `description`: A brief description of the category.\n            \n    - `inventory`: An object containing inventory details, including:\n        \n        - `id`: Unique identifier for the inventory.\n            \n        - `quantity_available`: Number of items available in stock.\n            \n        - `quantity_sold`: Number of items sold.\n            \n        - `product_id`: Identifier for the associated product.\n            \n    - `outOfStock`: A boolean indicating whether the product is out of stock.\n        \n- **total**: Total number of products available.\n    \n- **page**: Current page number.\n    \n- **totalPages**: Total number of pages available based on the limit set.\n    \n\n### Example Response\n\n``` json\n{\n  \"products\": [\n    {\n      \"id\": 0,\n      \"name\": \"\",\n      \"price\": 0,\n      \"category_id\": 0,\n      \"inventory_id\": 0,\n      \"image_url\": \"\",\n      \"category\": {\n        \"products\": [],\n        \"id\": 0,\n        \"name\": \"\",\n        \"description\": \"\"\n      },\n      \"inventory\": {\n        \"id\": 0,\n        \"quantity_available\": 0,\n        \"quantity_sold\": 0,\n        \"product_id\": 0\n      },\n      \"outOfStock\": true\n    }\n  ],\n  \"total\": 0,\n  \"page\": 0,\n  \"totalPages\": 0\n}\n\n ```"
+			},
+			"response": []
+		}
+	]
+}
